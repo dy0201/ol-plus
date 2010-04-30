@@ -1,0 +1,31 @@
+Index: lib/OpenLayers/Layer/WFS.js
+===================================================================
+--- lib/OpenLayers/Layer/WFS.js	(revision 9484)
++++ lib/OpenLayers/Layer/WFS.js	(working copy)
+@@ -288,9 +288,24 @@
+                 params = {FILTER: filter};
+             }
+             else {
+-                params = {BBOX: this.encodeBBOX ? tileBounds.toBBOX() 
++				// fix the issue with WFS 1.1.0 where in certain projection coordinate are in reverse order like (lat, lon) 
++                var flippedTileBounds = tileBounds.clone();
++				if(this.formatOptions.xy === false) {
++					flippedTileBounds = new OpenLayers.Bounds(
++						flippedTileBounds.bottom,
++						flippedTileBounds.left,
++						flippedTileBounds.top,
++						flippedTileBounds.bottom
++					);
++				}
++				params = {BBOX: this.encodeBBOX ? flippedTileBounds.toBBOX() 
++                                                    : flippedTileBounds.toArray()};
++				// old code without fix
++				/*	
++				params = {BBOX: this.encodeBBOX ? tileBounds.toBBOX() 
+                                                     : tileBounds.toArray()};
+-            }
++				*/            
++			}
+             
+             if (this.map && !this.projection.equals(this.map.getProjectionObject())) {
+                 var projectedBounds = tileBounds.clone();

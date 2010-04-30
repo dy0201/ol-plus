@@ -1,0 +1,2335 @@
+Index: lib/OpenLayers.js
+===================================================================
+--- lib/OpenLayers.js	(revision 9485)
++++ lib/OpenLayers.js	(working copy)
+@@ -168,6 +168,7 @@
+             "OpenLayers/Control/DrawFeature.js",
+             "OpenLayers/Control/DragFeature.js",
+             "OpenLayers/Control/ModifyFeature.js",
++			"OpenLayers/Control/ModifyFeature2.js",
+             "OpenLayers/Control/Panel.js",
+             "OpenLayers/Control/SelectFeature.js",
+             "OpenLayers/Control/NavigationHistory.js",
+@@ -206,6 +207,8 @@
+             "OpenLayers/Strategy/Paging.js",
+             "OpenLayers/Strategy/BBOX.js",
+             "OpenLayers/Strategy/Save.js",
++			"OpenLayers/Strategy/Lock.js",
++			"OpenLayers/Strategy/Save2.js",
+             "OpenLayers/Protocol.js",
+             "OpenLayers/Protocol/HTTP.js",
+             "OpenLayers/Protocol/SQL.js",
+@@ -214,6 +217,10 @@
+             "OpenLayers/Protocol/WFS/v1.js",
+             "OpenLayers/Protocol/WFS/v1_0_0.js",
+             "OpenLayers/Protocol/WFS/v1_1_0.js",
++			"OpenLayers/Protocol/WFS2.js",
++            "OpenLayers/Protocol/WFS2/v1.js",
++            "OpenLayers/Protocol/WFS2/v1_0_0.js",
++            "OpenLayers/Protocol/WFS2/v1_1_0.js",
+             "OpenLayers/Layer/PointTrack.js",
+             "OpenLayers/Layer/GML.js",
+             "OpenLayers/Style.js",
+@@ -257,6 +264,10 @@
+             "OpenLayers/Format/WFST/v1.js",
+             "OpenLayers/Format/WFST/v1_0_0.js",
+             "OpenLayers/Format/WFST/v1_1_0.js",
++			"OpenLayers/Format/WFST2.js",
++            "OpenLayers/Format/WFST2/v1.js",
++            "OpenLayers/Format/WFST2/v1_0_0.js",
++            "OpenLayers/Format/WFST2/v1_1_0.js",
+             "OpenLayers/Format/Text.js",
+             "OpenLayers/Format/JSON.js",
+             "OpenLayers/Format/GeoJSON.js",
+Index: lib/OpenLayers/Control/ModifyFeature2.js
+===================================================================
+--- lib/OpenLayers/Control/ModifyFeature2.js	(revision 0)
++++ lib/OpenLayers/Control/ModifyFeature2.js	(revision 0)
+@@ -0,0 +1,196 @@
++/* Copyright (c) 2006 MetaCarta, Inc., published under the Clear BSD license.
++ * See http://svn.openlayers.org/trunk/openlayers/license.txt 
++ * for the full text of the license. */
++
++
++/**
++ * @requires OpenLayers/Control/DragFeature.js
++ * @requires OpenLayers/Control/SelectFeature.js
++ * @requires OpenLayers/Handler/Keyboard.js
++ */
++
++/**
++ * Class: OpenLayers.Control.ModifyFeature2
++ * Control to modify features.  When activated, a click renders the vertices
++ *     of a feature - these vertices can then be dragged.  By default, the
++ *     delete key will delete the vertex under the mouse.  New features are
++ *     added by dragging "virtual vertices" between vertices.  Create a new
++ *     control with the <OpenLayers.Control.ModifyFeature> constructor.
++ *
++ * Inherits From:
++ *  - <OpenLayers.Control.ModifyFeature2>
++ */
++OpenLayers.Control.ModifyFeature2 = OpenLayers.Class(OpenLayers.Control.ModifyFeature, {
++	
++	/**
++	 * 
++	 */
++	deleteFeatureCodes: null,
++	
++    /**
++     * 
++     * @param {Object} layer
++     * @param {Object} options
++     */
++	initialize: function(layer, options) {
++		OpenLayers.Control.ModifyFeature.prototype.initialize.apply(this, [layer, options]);		
++		this.deleteFeatureCodes = [81]; // press lowercase 'q' to delete the feature by default		
++		this.layer.events.on({
++			'transactionsucceeded': function() {
++										this.deactivate();
++										this.activate();										
++									},
++			'transactionfailed': function() {
++										this.deactivate();
++										this.activate();
++									},
++			scope: this	
++		});		
++	},
++	
++	/**
++     * Method: selectFeature
++     * Called when the select feature control selects a feature.
++     *
++     * Parameters:
++     * feature - {<OpenLayers.Feature.Vector>} the selected feature.
++     */
++    selectFeature: function(feature) {
++        this.feature = feature;       
++		if(feature.lockId && feature.lockId != "") {    		
++	   		if (this.mode == OpenLayers.Control.ModifyFeature.DELETE) { // DELETE mode
++				// TODO: press 'ctrl + d' to delete selected feature or explicitly call this.deleteFeature()
++				OpenLayers.Console.log("...feature is locked...control in DELETE mode...it can only be deleted...");
++			} else {
++				this.resetVertices();
++	   			this.dragControl.activate();
++				this.onModificationStart(this.feature);	
++				OpenLayers.Console.log("...feature is locked...so it can be modified...");
++			}				            
++		} else {
++	    	OpenLayers.Console.log("...feature is not locked...so it can not be modified/deleted...");
++	    }
++    },
++	
++	/**
++     * Method: dragStart
++     * Called by the drag feature control with before a feature is dragged.
++     *     This method is used to differentiate between points and vertices
++     *     of higher order geometries.  This respects the <geometryTypes>
++     *     property and forces a select of points when the drag control is
++     *     already active (and stops events from propagating to the select
++     *     control).
++     *
++     * Parameters:
++     * feature - {<OpenLayers.Feature.Vector>} The point or vertex about to be
++     *     dragged.
++     * pixel - {<OpenLayers.Pixel>} Pixel location of the mouse event.
++     */
++    dragStart: function(feature, pixel) {
++        // only change behavior if the feature is not in the vertices array
++        if(feature != this.feature && !feature.geometry.parent &&
++           feature != this.dragHandle && feature != this.radiusHandle) {
++            if(this.feature) {
++                // unselect the currently selected feature
++                this.selectControl.clickFeature.apply(this.selectControl,
++                                                      [this.feature]);
++            }
++            // check any constraints on the geometry type
++            if(this.geometryTypes == null ||
++               OpenLayers.Util.indexOf(this.geometryTypes,
++                                       feature.geometry.CLASS_NAME) != -1) {
++                
++				if(feature.lockId && feature.lockId != "") {
++					// select the point
++					// if feature is locked then dragControl is activated already, mousedown event won't reach selectControl 
++                	// so manually call this.selectControl.clickFeature() to select feature
++                	// otherwise don't call it because dragControl is activated so selectControl itself will call clickFeature
++	                this.selectControl.clickFeature.apply(this.selectControl,
++	                                                      [feature]);
++					OpenLayers.Console.log("...feature is locked...drag start...");
++	                /**
++	                 * TBD: These lines improve workflow by letting the user
++	                 *     immediately start dragging after the mouse down.
++	                 *     However, it is very ugly to be messing with controls
++	                 *     and their handlers in this way.  I'd like a better
++	                 *     solution if the workflow change is necessary.
++	                 */
++	                // prepare the point for dragging
++	                this.dragControl.overFeature.apply(this.dragControl,
++	                                                   [feature]);
++	                this.dragControl.lastPixel = pixel;
++	                this.dragControl.handlers.drag.started = true;
++	                this.dragControl.handlers.drag.start = pixel;
++	                this.dragControl.handlers.drag.last = pixel;
++				} else {
++					// if feature is not locked then dragControl is not activated yet
++                	// so don't call this.selectControl.clickFeature() because mousedown event can reach selectControl
++                	OpenLayers.Console.log("...feature is not locked...drag not start...");
++				}
++            }
++        }
++    },
++	
++	/**
++     * Method: handleKeypress
++     * Called by the feature handler on keypress.  This is used to delete
++     *     vertices. If the <deleteCode> property is set, vertices will
++     *     be deleted when a feature is selected for modification and
++     *     the mouse is over a vertex.
++     *
++     * Parameters:
++     * {Integer} Key code corresponding to the keypress event.
++     */
++    handleKeypress: function(evt) {
++        var code = evt.keyCode;
++        
++		if(this.mode == OpenLayers.Control.ModifyFeature2.DELETE) {
++			if(this.feature &&
++	           OpenLayers.Util.indexOf(this.deleteFeatureCodes, code) != -1) {
++				if(this.feature.lockId && this.feature.lockId != "") {
++					// delete feature at client and change state to "DELETE"				
++					this.feature.state = OpenLayers.State.DELETE;
++					this.layer.eraseFeatures([this.feature]);
++					// remove feature from this.layer.selectedFeatures to avoid feature to be drawn again					
++					if(OpenLayers.Util.indexOf(this.layer.selectedFeatures, this.feature) != -1) {
++						OpenLayers.Util.removeItem(this.layer.selectedFeatures, this.feature);						
++					}					
++					console.log("...delete feature at client side...");
++					this.layer.events.triggerEvent("featuremodified", 
++                                       {feature: this.feature});
++				} else {
++					console.log("...can not delete feature...feature must be locked first...");
++				}
++			} 
++		} else {
++			// check for delete key
++	        if(this.feature &&
++	           OpenLayers.Util.indexOf(this.deleteCodes, code) != -1) {
++	            var vertex = this.dragControl.feature;
++	            if(vertex &&
++	               OpenLayers.Util.indexOf(this.vertices, vertex) != -1 &&
++	               !this.dragControl.handlers.drag.dragging &&
++	               vertex.geometry.parent) {
++	                // remove the vertex
++	                vertex.geometry.parent.removeComponent(vertex.geometry);
++	                this.layer.drawFeature(this.feature,
++	                                       this.selectControl.renderIntent);
++	                this.resetVertices();
++	                this.setFeatureState();
++	                this.onModification(this.feature);
++	                this.layer.events.triggerEvent("featuremodified", 
++	                                               {feature: this.feature});
++	            }
++	        }
++		}
++    },
++
++    CLASS_NAME: "OpenLayers.Control.ModifyFeature2"
++});
++
++OpenLayers.Control.ModifyFeature2.RESHAPE = 1;
++OpenLayers.Control.ModifyFeature2.RESIZE = 2;
++OpenLayers.Control.ModifyFeature2.ROTATE = 4;
++OpenLayers.Control.ModifyFeature2.DRAG = 8;
++OpenLayers.Control.ModifyFeature2.DELETE = 16;
++
+Index: lib/OpenLayers/Format/WFST2.js
+===================================================================
+--- lib/OpenLayers/Format/WFST2.js	(revision 0)
++++ lib/OpenLayers/Format/WFST2.js	(revision 0)
+@@ -0,0 +1,29 @@
++/**
++ * @requires OpenLayers/Format.js
++ */
++
++/**
++ * Function: OpenLayers.Format.WFST2
++ * Used to create a versioned WFS protocol that supports Lock/GetFeatureWithLock.  Default version is 1.0.0.
++ *
++ * Returns:
++ * {<OpenLayers.Format>} A WFST format of the given version.
++ */
++OpenLayers.Format.WFST2 = function(options) {
++    options = OpenLayers.Util.applyDefaults(
++        options, OpenLayers.Format.WFST2.DEFAULTS
++    );
++    var cls = OpenLayers.Format.WFST2["v"+options.version.replace(/\./g, "_")];
++    if(!cls) {
++        throw "Unsupported WFST version: " + options.version;
++    }
++    return new cls(options);
++}
++
++/**
++ * Constant: OpenLayers.Format.WFST.DEFAULTS
++ * {Object} Default properties for the WFST format.
++ */
++OpenLayers.Format.WFST2.DEFAULTS = {
++    "version": "1.1.0"
++};
+Index: lib/OpenLayers/Format/WFST2/v1.js
+===================================================================
+--- lib/OpenLayers/Format/WFST2/v1.js	(revision 0)
++++ lib/OpenLayers/Format/WFST2/v1.js	(revision 0)
+@@ -0,0 +1,233 @@
++/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
++ * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
++ * full text of the license. */
++
++/**
++ * @requires OpenLayers/Format/XML.js
++ * @requires OpenLayers/Format/WFST/v1.js
++ */
++
++/**
++ * Class: OpenLayers.Format.WFST2.v1
++ * Superclass for WFST parsers.
++ *
++ * Inherits from:
++ *  - <OpenLayers.Format.WFST.v1>
++ */
++OpenLayers.Format.WFST2.v1 = OpenLayers.Class(OpenLayers.Format.WFST.v1, {
++    
++    /**
++     * APIProperty: xy
++     * {Boolean} Order of the GML coordinate true:(x,y) or false:(y,x)
++     * Changing is not recommended, a new Format should be instantiated.
++     */ 
++    xy: false,
++    
++    /**
++     * TODO: doc
++     */    
++    lockExpiry: "1",
++    
++    /**
++     * TODO: doc
++     */
++    releaseAction: "ALL", // stick to "ALL" for current
++
++    /**
++     * Constructor: OpenLayers.Format.WFST2.v1
++     * Instances of this class are not created directly.  Use the
++     *     <OpenLayers.Format.WFST2.v1_0_0> or <OpenLayers.Format.WFST2.v1_1_0>
++     *     constructor instead.
++     *
++     * Parameters:
++     * options - {Object} An optional object whose properties will be set on
++     *     this instance.
++     */
++    initialize: function(options) {    
++		if(options.featureNS) {
++            this.namespaces = OpenLayers.Util.extend(
++                {
++					feature: options.featureNS
++				},
++                OpenLayers.Format.WFST.v1.prototype.namespaces
++            );
++        }
++		this.namespaces[this.featurePrefix] = this.featureNS;
++		OpenLayers.Format.WFST.v1.prototype.initialize.apply(this, [options]);
++		// add customized namespace prefix/uri pair to the format
++		// important for OpenLayers.Format.XML.createElementNSPlus() 		
++										
++		// extend wfst format with misc properties from filter and gml formats        		
++		OpenLayers.Util.extend(
++			this, 
++			{
++            	readOgcExpression: 	OpenLayers.Format.Filter.v1.prototype.readOgcExpression,
++            	getFilterType: 		OpenLayers.Format.Filter.v1.prototype.getFilterType,
++            	filterMap: 			OpenLayers.Format.Filter.v1.prototype.filterMap,
++            	//setGeometryTypes: 	OpenLayers.Format.GML.Base.prototype.setGeometryTypes,
++            	regExes: 			OpenLayers.Format.GML.Base.prototype.regExes
++        });
++		// call OpenLayers.Format.GML.Base.prototype.setGeometryTypes to set 
++		//   maps between OpenLayers geometry class names to GML element names						        	
++		OpenLayers.Format.GML.Base.prototype.setGeometryTypes.call(this);
++		// overwrite this.geometryTypes to encode MultiLineString/MultiPolygon geometry in MultiCurve/MultiSurface
++		this.geometryTypes['OpenLayers.Geometry.MultiLineString'] = "MultiCurve";
++		this.geometryTypes['OpenLayers.Geometry.MultiPolygon'] = "MultiSurface";		
++    },
++
++    /**
++     * Method: read
++     * Parse the response from a transaction.  Because WFS is split into
++     *     Transaction requests (create, update, and delete) and GetFeature
++     *     requests (read), this method handles parsing of both types of
++     *     responses.
++     */
++    read: function(data) {
++        if(typeof data == "string") { 
++            data = OpenLayers.Format.XML.prototype.read.apply(this, [data]);
++        }
++        if(data && data.nodeType == 9) {
++            data = data.documentElement;
++        }
++        var obj = {};
++        this.readNode(data, obj);        
++		// attach 'lockId' to each feature parsed which will be used for lock/unlock and transactions        
++        // obj.lockId carries the common lockId string for all the features in obj.features
++        var lockIdValue = obj.lockId;
++        //OpenLayers.Console.log(lockIdValue);
++        if(obj.features) {
++            obj = obj.features;
++            // add 'lockId' to each feature as an interal attribute
++            for(var i=0; i<obj.length; i++) {            	
++            	obj[i].lockId = lockIdValue;
++            }
++        }               
++        return obj;
++    },
++    
++    /**
++     * Property: readers
++     * Contains public functions, grouped by namespace prefix, that will
++     *     be applied when a namespaced node is found matching the function
++     *     name.  The function will be applied in the scope of this parser
++     *     with two arguments: the node being read and a context object passed
++     *     from the parent.
++     */
++    readers: {
++        "wfs": OpenLayers.Util.applyDefaults({
++            "FeatureCollection": function(node, obj) {
++                obj.features = [];
++                // parse 'lockId' from GetFeatureWithLock response
++                var lockIdValue = node.getAttribute("lockId");                
++                obj.lockId = (lockIdValue === "") ? null : lockIdValue;
++                //
++                this.readChildNodes(node, obj);
++            }
++        }, OpenLayers.Format.WFST.v1.prototype.readers["wfs"])
++    },
++    
++    /**
++     * Method: getSrsName
++     */
++    getSrsName: function(feature, options) {
++        var srsName = this.options.srsName;
++        if(!srsName) {
++        	srsName = OpenLayers.Format.WFST.v1.prototype.getSrsName(feature, options);
++        }
++        return srsName;
++    },
++    
++    /**
++     * Property: writers
++     * As a compliment to the readers property, this structure contains public
++     *     writing functions grouped by namespace alias and named like the
++     *     node names they produce.
++     */
++    writers: {
++        "wfs": OpenLayers.Util.applyDefaults({            
++            // TODO: doc
++            "GetFeatureWithLock": function(options) {
++            	var node = this.createElementNSPlus("wfs:GetFeatureWithLock", {
++                    attributes: {
++	                    service: "WFS",
++	                    version: this.version,	                    	                   
++	                    expiry: this.lockExpiry, // how long for lock to expire
++	                    "xsi:schemaLocation": this.schemaLocationAttr()
++	                }
++	            });
++	            this.writeNode("Query", options, node);
++	            return node;
++            },
++            // override 'Transaction' writer of parent class to support WFS transaction with lock
++            "Transaction": function(features) {
++                var node = this.createElementNSPlus("wfs:Transaction", {
++                    attributes: {
++                        service: "WFS",
++                        version: this.version,
++                        releaseAction: this.releaseAction, 
++                    }
++                });
++                
++                if(features) {
++                    var name; 
++                    var feature;
++                    var hasCommonLockId = true;                    
++                    // assume features in the transaction have a common lockId, which 'Save' strategy should guarantee 
++                    // otherwise no lockId or feature will be include, which causes transaction failure                                        
++                    var lockIds = {};
++                    hasCommonLockId = false;    
++                    for(var i=0, len=features.length; i<len; ++i) {                    	
++                        feature = features[i];
++                        if(features[i].lockId === null) {break;}
++                        lockIds[features[i].lockId] = features[i].lockId;                         
++                    }
++                    var count = 0;
++                    var lockId = null;
++                    for(var key in lockIds) {
++                    	if(lockId != lockIds[key]) {
++                    		count++;
++                    		lockId = lockIds[key];
++                    	}
++                    }
++                    if(count == 1 && lockId != null && lockId != "") {hasCommonLockId = true;}
++                    
++                    if(hasCommonLockId === true) {
++	                    // if features have common lockId, include them in transaction
++	                    // do not include special lockId "__insert__", which is fake lockId for inserted features
++						if(lockId != "__insert__") {
++							this.writeNode("LockId", lockId, node);
++						} 						
++	                    for(var i=0, len=features.length; i<len; ++i) {
++	                    	feature = features[i];
++	                    	name = this.stateName[feature.state];
++	                        if(name) {
++	                            this.writeNode(name, feature, node);
++	                        }
++	                    }
++                    }
++                }                
++                return node;
++            },
++            "UnlockFeature": function(options) {
++                var node = this.createElementNSPlus("wfs:Transaction", {
++                    attributes: {
++                        service: "WFS",
++                        version: this.version,
++                        releaseAction: this.releaseAction, 
++                    }
++                });
++                this.writeNode("LockId", options.lockId, node);                
++                return node;
++            },
++            "LockId": function(lockId) {
++            	var node = this.createElementNSPlus("wfs:LockId", {
++                    attributes: {},
++                    value: lockId
++                });
++            	return node;
++            },
++        }, OpenLayers.Format.WFST.v1.prototype.writers["wfs"])
++    },
++
++    CLASS_NAME: "OpenLayers.Format.WFST2.v1" 
++});
+Index: lib/OpenLayers/Format/WFST2/v1_0_0.js
+===================================================================
+--- lib/OpenLayers/Format/WFST2/v1_0_0.js	(revision 0)
++++ lib/OpenLayers/Format/WFST2/v1_0_0.js	(revision 0)
+@@ -0,0 +1,119 @@
++/**
++ * @requires OpenLayers/Format/WFST2/v1.js
++ * @requires OpenLayers/Format/GML/v2.js
++ * @requires OpenLayers/Format/Filter/v1_0_0.js
++ */
++
++/**
++ * Class: OpenLayers.Format.WFST2.v1_0_0
++ * A format for creating WFS v1.0.0 transactions.  Create a new instance with the
++ *     <OpenLayers.Format.WFST2.v1_0_0> constructor.
++ *
++ * Inherits from:
++ *  - <OpenLayers.Format.WFST2.v1>
++ */
++OpenLayers.Format.WFST2.v1_0_0 = OpenLayers.Class(OpenLayers.Format.WFST2.v1, {
++    
++    /**
++     * Property: version
++     * {String} WFS version number.
++     */
++    version: "1.0.0",
++    
++    /**
++     * Property: schemaLocations
++     * {Object} Properties are namespace aliases, values are schema locations.
++     */
++    schemaLocations: {
++        "wfs": "http://schemas.opengis.net/wfs/1.0.0/WFS-transaction.xsd"
++    },
++
++    /**
++     * Constructor: OpenLayers.Format.WFST2.v1_0_0
++     * A class for parsing and generating WFS v1.0.0 transactions.
++     *
++     * Parameters:
++     * options - {Object} Optional object whose properties will be set on the
++     *     instance.
++     *
++     * Valid options properties:
++     * featureType - {String} Local (without prefix) feature typeName (required).
++     * featureNS - {String} Feature namespace (optional).
++     * featurePrefix - {String} Feature namespace alias (optional - only used
++     *     if featureNS is provided).  Default is 'feature'.
++     * geometryName - {String} Name of geometry attribute.  Default is 'the_geom'.
++     */
++    
++    /**
++     * Property: readers
++     * Contains public functions, grouped by namespace prefix, that will
++     *     be applied when a namespaced node is found matching the function
++     *     name.  The function will be applied in the scope of this parser
++     *     with two arguments: the node being read and a context object passed
++     *     from the parent.
++     */
++    readers: {
++        "wfs": OpenLayers.Util.applyDefaults({
++            "WFS_TransactionResponse": function(node, obj) {
++                obj.insertIds = [];
++                obj.success = false;
++                this.readChildNodes(node, obj);
++            },
++            "InsertResult": function(node, container) {
++                var obj = {fids: []};
++                this.readChildNodes(node, obj);
++                container.insertIds.push(obj.fids[0]);
++            },
++            "TransactionResult": function(node, obj) {
++                this.readChildNodes(node, obj);
++            },
++            "Status": function(node, obj) {
++                this.readChildNodes(node, obj);
++            },
++            "SUCCESS": function(node, obj) {
++                obj.success = true;
++            }
++        }, OpenLayers.Format.WFST2.v1.prototype.readers["wfs"]),
++        "gml": OpenLayers.Format.GML.v2.prototype.readers["gml"],
++        "feature": OpenLayers.Format.GML.v2.prototype.readers["feature"],
++        "ogc": OpenLayers.Format.Filter.v1_0_0.prototype.readers["ogc"]
++    },
++
++    /**
++     * Property: writers
++     * As a compliment to the readers property, this structure contains public
++     *     writing functions grouped by namespace alias and named like the
++     *     node names they produce.
++     */
++    writers: {
++        "wfs": OpenLayers.Util.applyDefaults({
++            "Query": function(options) {
++                options = OpenLayers.Util.extend({
++                    featureNS: this.featureNS,
++                    featurePrefix: this.featurePrefix,
++                    featureType: this.featureType,
++                    srsName: this.srsName
++                }, options);
++                var node = this.createElementNSPlus("wfs:Query", {
++                    attributes: {
++                        typeName: (options.featureNS ? options.featurePrefix + ":" : "") +
++                            options.featureType
++                    }
++                });
++                if(options.featureNS) {
++                    node.setAttribute("xmlns:" + options.featurePrefix, options.featureNS);
++                }
++                if(options.filter) {
++                    this.setFilterProperty(options.filter);
++                    this.writeNode("ogc:Filter", options.filter, node);
++                }
++                return node;
++            }
++        }, OpenLayers.Format.WFST2.v1.prototype.writers["wfs"]),
++        "gml": OpenLayers.Format.GML.v2.prototype.writers["gml"],
++        "feature": OpenLayers.Format.GML.v2.prototype.writers["feature"],
++        "ogc": OpenLayers.Format.Filter.v1_0_0.prototype.writers["ogc"]
++    },
++   
++    CLASS_NAME: "OpenLayers.Format.WFST2.v1_0_0" 
++});
+Index: lib/OpenLayers/Format/WFST2/v1_1_0.js
+===================================================================
+--- lib/OpenLayers/Format/WFST2/v1_1_0.js	(revision 0)
++++ lib/OpenLayers/Format/WFST2/v1_1_0.js	(revision 0)
+@@ -0,0 +1,226 @@
++/**
++ * @requires OpenLayers/Format/WFST2/v1.js
++ * @requires OpenLayers/Format/GML/v3.js
++ * @requires OpenLayers/Format/Filter/v1_1_0.js
++ */
++
++/**
++ * Class: OpenLayers.Format.WFST2.v1_1_0
++ * A format for creating WFS v1.1.0 transactions.  Create a new instance with the
++ *     <OpenLayers.Format.WFST2.v1_1_0> constructor.
++ *
++ * Inherits from:
++ *  - <OpenLayers.Format.WFST.v1>
++ */
++OpenLayers.Format.WFST2.v1_1_0 = OpenLayers.Class(OpenLayers.Format.WFST2.v1, {
++    
++    /**
++     * Property: version
++     * {String} WFS version number.
++     */
++    version: "1.1.0",
++    
++    /**
++     * Property: schemaLocations
++     * {Object} Properties are namespace aliases, values are schema locations.
++     */
++    schemaLocations: {
++        "wfs": "http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
++    },
++    
++    /**
++     * Constructor: OpenLayers.Format.WFST2.v1_1_0
++     * A class for parsing and generating WFS v1.1.0 transactions.
++     *
++     * Parameters:
++     * options - {Object} Optional object whose properties will be set on the
++     *     instance.
++     *
++     * Valid options properties:
++     * featureType - {String} Local (without prefix) feature typeName (required).
++     * featureNS - {String} Feature namespace (optional).
++     * featurePrefix - {String} Feature namespace alias (optional - only used
++     *     if featureNS is provided).  Default is 'feature'.
++     * geometryName - {String} Name of geometry attribute.  Default is 'the_geom'.
++     */
++    
++    /**
++     * Property: readers
++     * Contains public functions, grouped by namespace prefix, that will
++     *     be applied when a namespaced node is found matching the function
++     *     name.  The function will be applied in the scope of this parser
++     *     with two arguments: the node being read and a context object passed
++     *     from the parent.
++     */
++    readers: {
++        "wfs": OpenLayers.Util.applyDefaults({
++            "TransactionResponse": function(node, obj) {
++                obj.insertIds = [];
++                obj.success = false;
++                this.readChildNodes(node, obj);
++            },
++            "TransactionSummary": function(node, obj) {
++                // this is a limited test of success
++                obj.success = true;
++            },
++            "InsertResults": function(node, obj) {
++                this.readChildNodes(node, obj);
++            },
++            "Feature": function(node, container) {
++                var obj = {fids: []};
++                this.readChildNodes(node, obj);
++                container.insertIds.push(obj.fids[0]);
++            }
++        }, OpenLayers.Format.WFST2.v1.prototype.readers["wfs"]),
++        // readers in OpenLayers.Format.GML.v3 doesn't support 'MultiCurve' or 'MultiSurface'
++		// add readers under 'gml' namespace to support parsing 'MultiCurve' or 'MultiSurface'
++		"gml":  OpenLayers.Util.applyDefaults({ 			
++            /*
++			"MultiCurve": function(node, container) { // add support gml:MultiCurve
++                var obj = {components: []};
++                this.readChildNodes(node, obj);
++                if(obj.components.length > 0) {
++                    container.components = [
++                        new OpenLayers.Geometry.MultiLineString(obj.components)
++                    ];
++                }
++            },
++            "curveMember": function(node, obj) { // add support gml:curveMember
++                this.readChildNodes(node, obj);
++            },
++            "MultiSurface": function(node, container) { // add support gml:MultiSurface
++                var obj = {components: []};
++                this.readChildNodes(node, obj);
++                if(obj.components.length > 0) {
++                    container.components = [
++                        new OpenLayers.Geometry.MultiPolygon(obj.components)
++                    ];
++                }
++            },
++            "surfaceMember": function(node, obj) { // add support gml:surfaceMember
++                this.readChildNodes(node, obj);
++            }
++			*/
++		}, OpenLayers.Format.GML.v3.prototype.readers["gml"]),
++        "feature": OpenLayers.Format.GML.v3.prototype.readers["feature"],
++        "ogc": OpenLayers.Format.Filter.v1_1_0.prototype.readers["ogc"]
++    },
++
++    /**
++     * Property: writers
++     * As a compliment to the readers property, this structure contains public
++     *     writing functions grouped by namespace alias and named like the
++     *     node names they produce.
++     */
++    writers: {
++        // writers for 'wfs' namespace
++		"wfs": OpenLayers.Util.applyDefaults({
++            "Query": function(options) {
++                options = OpenLayers.Util.extend({
++                    featureNS: this.featureNS,
++                    featurePrefix: this.featurePrefix,
++                    featureType: this.featureType,
++                    srsName: this.srsName
++                }, options);
++                var node = this.createElementNSPlus("wfs:Query", {
++                    attributes: {
++                        typeName: (options.featureNS ? options.featurePrefix + ":" : "") +
++                            options.featureType,
++                        srsName: options.srsName
++                    }
++                });
++                if(options.featureNS) {
++                    node.setAttribute("xmlns:" + options.featurePrefix, options.featureNS);
++                }
++                if(options.filter) {
++                    this.setFilterProperty(options.filter);
++                    this.writeNode("ogc:Filter", options.filter, node);
++                }
++                return node;
++            }
++        }, OpenLayers.Format.WFST2.v1.prototype.writers["wfs"]),
++		// writers in OpenLayers.Format.GML.v3 doesn't support 'MultiCurve' or 'MultiSurface' out of box
++		// add writers under 'gml' namespace to support encoding 'MultiCurve' or 'MultiSurface'
++        "gml": OpenLayers.Util.applyDefaults({
++			/*
++			"MultiCurve": function(geometry) {
++                var node = this.createElementNSPlus("gml:MultiCurve");
++                for(var i=0; i<geometry.components.length; ++i) {
++                    this.writeNode("curveMember", geometry.components[i], node);
++                }
++                return node;
++            },
++            "curveMember": function(geometry) {
++                var node = this.createElementNSPlus("gml:curveMember");
++                this.writeNode("LineString", geometry, node);
++                return node;
++            },
++            "MultiSurface": function(geometry) {
++                var node = this.createElementNSPlus("gml:MultiSurface");
++                for(var i=0; i<geometry.components.length; ++i) {
++                    this.writeNode(
++                        "surfaceMember", geometry.components[i], node
++                    );
++                }
++                return node;
++            },
++            "surfaceMember": function(geometry) {
++                var node = this.createElementNSPlus("gml:surfaceMember");
++                this.writeNode("Polygon", geometry, node);
++                return node;
++            }
++            */
++		}, OpenLayers.Format.GML.v3.prototype.writers["gml"]),
++        // writers['feature'] in OpenLayers.Format.GML.v3 doesn't support customized namespace
++		// override writers['feature'] in OpenLayers.Format.GML.v3
++        "feature": OpenLayers.Util.applyDefaults({
++            "_typeName": function(feature) {
++				// use this.featurePrefix instead of hard coded prefix "feature"
++                var node = this.createElementNSPlus(this.featurePrefix + ":" + this.featureType, {
++                    attributes: {fid: feature.fid}
++                });
++                if(feature.geometry) {
++                    this.writeNode("feature:_geometry", feature.geometry, node);
++                }
++                for(var name in feature.attributes) {
++                    var value = feature.attributes[name];
++                    if(value != null) {
++                        this.writeNode(
++                            "feature:_attribute",
++                            {name: name, value: value}, node
++                        )
++                    }
++                }
++                return node;
++            },
++            "_geometry": function(geometry) {
++                if(this.externalProjection && this.internalProjection) {
++                    geometry = geometry.clone().transform(
++                        this.internalProjection, this.externalProjection
++                    );
++                }    
++                // use this.featurePrefix instead of hard coded prefix "feature"
++				var node = this.createElementNSPlus(
++                    this.featurePrefix + ":" + this.geometryName
++                );
++                // gml:multiPolygon could be gml:multiPolygon or gml:multiSurface
++				// gml:multiLineString could be gml:multiLineString or gml:multiCurve
++				var type = this.geometryTypes[geometry.CLASS_NAME];				
++                var child = this.writeNode("gml:" + type, geometry, node);
++                if(this.srsName) {
++                    child.setAttribute("srsName", this.srsName);
++                }
++                return node;
++            },
++            "_attribute": function(obj) {
++				// use this.featurePrefix instead of hard coded prefix "feature"
++                return this.createElementNSPlus(this.featurePrefix + ":" + obj.name, {
++                    value: obj.value
++                });
++            }
++        }, OpenLayers.Format.GML.v3.prototype.writers["feature"]),
++		"ogc": OpenLayers.Format.Filter.v1_1_0.prototype.writers["ogc"]
++    },
++
++    CLASS_NAME: "OpenLayers.Format.WFST2.v1_1_0" 
++});
+Index: lib/OpenLayers/Protocol/WFS2.js
+===================================================================
+--- lib/OpenLayers/Protocol/WFS2.js	(revision 0)
++++ lib/OpenLayers/Protocol/WFS2.js	(revision 0)
+@@ -0,0 +1,48 @@
++/**
++ * @requires OpenLayers/Protocol.js
++ */
++
++/**
++ * Function: OpenLayers.Protocol.WFS2
++ * Used to create a versioned WFS protocol that supports Lock/GetFeatureWithLock.  Default version is 1.0.0.
++ *
++ * Returns:
++ * {<OpenLayers.Protocol>} A WFS protocol of the given version.
++ */
++OpenLayers.Protocol.WFS2 = function(options) {
++    options = OpenLayers.Util.applyDefaults(
++        options, OpenLayers.Protocol.WFS2.DEFAULTS
++    );
++    var cls = OpenLayers.Protocol.WFS2["v"+options.version.replace(/\./g, "_")];
++    if(!cls) {
++        throw "Unsupported WFS version: " + options.version;
++    }
++    return new cls(options);
++}
++
++/**
++ * Function: OpenLayers.Protocol.WFS.fromWMSLayer
++ * Convenience function to create a WFS protocol from a WMS layer.  This makes
++ *     the assumption that a WFS requests can be issued at the same URL as
++ *     WMS requests and that a WFS featureType exists with the same name as the
++ *     WMS layer.
++ *     
++ * This function is designed to auto-configure <url>, <featureType>,
++ *     <featurePrefix> and <srsName> for WFS <version> 1.1.0. Note that
++ *     srsName matching with the WMS layer will not work with WFS 1.0.0..
++ * 
++ * Parameters:
++ * layer - {<OpenLayers.Layer.WMS>} WMS layer that has a matching WFS
++ *     FeatureType at the same server url with the same typename.
++ * options - {Object} Default properties to be set on the protocol.
++ *
++ */
++// inherit 'fromWMSLayer' function from WFS protocol
++OpenLayers.Protocol.WFS2.fromWMSLayer = OpenLayers.Protocol.WFS.fromWMSLayer;
++
++/**
++ * Constant: OpenLayers.Protocol.WFS2.DEFAULTS
++ */
++OpenLayers.Protocol.WFS2.DEFAULTS = {
++    "version": "1.1.0"
++};
+Index: lib/OpenLayers/Protocol/WFS2/v1.js
+===================================================================
+--- lib/OpenLayers/Protocol/WFS2/v1.js	(revision 0)
++++ lib/OpenLayers/Protocol/WFS2/v1.js	(revision 0)
+@@ -0,0 +1,275 @@
++/**
++ * @requires OpenLayers/Protocol/WFS2.js
++ * @requires OpenLayers/Protocol/WFS/v1.js
++ */
++
++/**
++ * Class: OpenLayers.Protocol.WFS2.v1
++ * Abstract class for for v1.0.0 and v1.1.0 protocol.
++ *
++ * Inherits from:
++ *  - <OpenLayers.Protocol.WFS.v1>
++ */
++OpenLayers.Protocol.WFS2.v1 = new OpenLayers.Class(OpenLayers.Protocol.WFS.v1, {
++    
++    /**
++     * Property: version
++     * {String} WFS version number.
++     */
++    version: null,
++    
++    /**
++     * Property: srsName
++     * {String} Name of spatial reference system.  Default is "EPSG:4326".
++     */
++    srsName: "urn:x-ogc:def:crs:EPSG:6.9:4326",
++    
++    /**
++     * Property: featureType
++     * {String} Local feature typeName.
++     */
++    featureType: null,
++    
++    /**
++     * Property: featureNS
++     * {String} Feature namespace.
++     */
++    featureNS: "http://www.esri.com",	
++    
++    /**
++     * Property: geometryName
++     * {String} Name of the geometry attribute for features.
++     */
++    geometryName: "Shape",
++
++    /**
++     * Property: featurePrefix
++     * {String} Namespace alias for feature type.  Default is "feature".
++     */
++    featurePrefix: "esri",
++            
++    /**
++     * Property: formatOptions
++     * {Object} Optional options for the format.  If a format is not provided,
++     *     this property can be used to extend the default format options.
++     */
++    formatOptions: {
++		xy: false, 				// WFS service 1.1.0 from ArcGIS Server has Lat/Lon order for coordinates
++				   				//   'xy = false' meaning coordinate in (lat, lat) order, otherwise in (lon, lat) order  
++		lockExpiry: "1",		// minutes it takes for a lock to expire
++		releaseAction: "ALL"	// release all locks when a transaction is successfully completed
++	},
++    
++    /**
++     * Constructor: OpenLayers.Protocol.WFS2
++     * A class for giving layers WFS protocol.
++     *
++     * Parameters:
++     * options - {Object} Optional object whose properties will be set on the
++     *     instance.
++     *
++     * Valid options properties:
++     * featureType - {String} Local (without prefix) feature typeName (required).
++     * featureNS - {String} Feature namespace (optional).
++     * featurePrefix - {String} Feature namespace alias (optional - only used
++     *     if featureNS is provided).  Default is 'feature'.
++     * geometryName - {String} Name of geometry attribute.  Default is 'the_geom'.
++     */
++    initialize: function(options) {
++		OpenLayers.Protocol.WFS.v1.prototype.initialize.apply(this, [options]);		
++    },
++
++    /**
++     * Method: readWithLock (WFS GetFeatureWithLock)
++     * Construct a request for reading new features and locking them at the same time.
++     * 
++     * Parameters:
++     * options - {Object} Optional object for configuring the request.
++     * 		options.filter - {OpenLayers.Filter}
++     * 		options.callback - {function}
++     * 		options.scope - {object}
++     *
++     * Returns:
++     * {<OpenLayers.Protocol.Response>} An <OpenLayers.Protocol.Response>
++     * object, the same object will be passed to the callback function passed
++     * if one exists in the options object.
++     */
++    readWithLock: function(options) {
++    	options = OpenLayers.Util.extend({}, options);
++    	OpenLayers.Util.applyDefaults(options, this.options || {});
++    	var response = new OpenLayers.Protocol.Response({requestType: "readWithLock"});
++    	
++    	var req_node = this.format.writeNode("wfs:GetFeatureWithLock", options);
++    	OpenLayers.Console.log("...wfs:GetFeatureWithLock request...");
++    	OpenLayers.Console.dirxml(req_node);
++    	
++    	var data = OpenLayers.Format.XML.prototype.write.apply(this.format, [req_node]);
++    	//OpenLayers.Console.log(data);
++    	        
++    	response.priv = OpenLayers.Request.POST({
++            url: options.url,
++            callback: this.createCallback(this.handleReadWithLock, response, options),
++            params: options.params,
++            headers: options.headers,
++            data: data
++        });        
++        
++        return response;
++    },
++    
++    /**
++     * Method: unlock
++     * Given a list of feature, assemble a batch request for update, create,
++     *     and delete transactions with lockId included.  A commit call on the prototype amounts
++     *     to writing a WFS transaction - so the write method on the format
++     *     is used.
++     *
++     * Parameters:
++     * options - {Object} Optional object for configuring the request.
++     *
++     * Returns:
++     * {<OpenLayers.Protocol.Response>} A response object with a features
++     *     property containing any insertIds and a priv property referencing
++     *     the XMLHttpRequest object.
++     */
++    unlock: function(options) {
++        options = OpenLayers.Util.extend({}, options);
++        OpenLayers.Util.applyDefaults(options, this.options);
++        
++        OpenLayers.Console.log("...wfs:Transaction request...");
++        var req_node = this.format.writeNode("wfs:UnlockFeature", options);
++        OpenLayers.Console.dirxml(req_node);
++        
++        var data = OpenLayers.Format.XML.prototype.write.apply(this.format, [req_node]);
++    	//OpenLayers.Console.log(data);
++        
++        var response = new OpenLayers.Protocol.Response({
++        	requestType: "unlock",
++        	lockId: options.lockId
++        });
++        
++        response.priv = OpenLayers.Request.POST({
++            url: options.url,
++            data: data,
++            callback: this.createCallback(this.handleUnlock, response, options)
++        });        
++        return response;
++    },
++    
++    /**
++     * Method: commitWithLock
++     * Given a list of feature, assemble a batch request for update, create,
++     *     and delete transactions.  A commit call on the prototype amounts
++     *     to writing a WFS transaction with lock - so the write method on the format
++     *     is used.
++     *
++     * Parameters:
++     * features - {Array(<OpenLayers.Feature.Vector>}
++     *
++     * Returns:
++     * {<OpenLayers.Protocol.Response>} A response object with a features
++     *     property containing any insertIds and a priv property referencing
++     *     the XMLHttpRequest object.
++     */
++    commitWithLock: function(features, options) {
++
++        options = OpenLayers.Util.extend({}, options);
++        OpenLayers.Util.applyDefaults(options, this.options);
++        
++        // need a separate commit transaction for each different lockId
++        var lockIds = {};
++        var responses = {};
++
++        for(var i=0; i<features.length; i++) {
++        	if(features[i].lockId && features[i].lockId != "") { // modified/deleted features	        	
++				if(lockIds[features[i].lockId] == null) {
++	        		lockIds[features[i].lockId] = [];        	
++	        	}
++	        	lockIds[features[i].lockId].push(features[i]);
++        	} else if(features[i].state == OpenLayers.State.INSERT) { // inserted features
++				// committing inserted features does not need a 'lockId'
++				// use special lockId '__insert__'  
++				if(lockIds['__insert__'] == null) {
++	        		lockIds['__insert__'] = [];        	
++	        	}
++				features[i].lockId = "__insert__";
++	        	lockIds['__insert__'].push(features[i]);
++			} else {
++				// do nothing
++			}
++        }
++        // transactions to commit modified/deleted features
++        for(var key in lockIds) {
++        	if(key && key !== "") {
++	        	var featuresWithCommonLockId = lockIds[key];        	
++	        	responses[key] = new OpenLayers.Protocol.Response({
++	                requestType: "commitWithLock",
++	                reqFeatures: featuresWithCommonLockId,
++	                lockId: key // carry 'lockId'
++	            });
++	        	
++	        	var req_node = this.format.writeNode("wfs:Transaction", featuresWithCommonLockId);
++	        	OpenLayers.Console.log("...transaction with lockId: " + key + "...");
++	        	OpenLayers.Console.log("...wfs:Transaction request...");
++	        	OpenLayers.Console.dirxml(req_node);
++	            var data = OpenLayers.Format.XML.prototype.write.apply(this, [req_node]);
++	            //OpenLayers.Console.log(data);
++				responses[key].priv = OpenLayers.Request.POST({
++		            url: options.url,
++		            data: data,
++		            callback: this.createCallback(this.handleCommitWithLock, responses[key], options)
++		        });				
++        	}
++        }
++        // return a collection of responses indexeed by different lockId
++        return responses;
++    },
++       
++    /**
++     * Method: handleReadWithLock
++     * Deal with response from the readWithLock request.
++     *
++     * Parameters:
++     * response - {<OpenLayers.Protocol.Response>} The response object to pass
++     *     to the user callback.
++     * options - {Object} The user options passed to the readWithLock call.
++     */
++    handleReadWithLock: function(response, options) {            	
++    	this.handleRead(response, options);
++    },
++    
++    /**
++     * Method: handleCommitWithLock
++     * Deal with response from the commitWithLock request.
++     *
++     * Parameters:
++     * response - {<OpenLayers.Protocol.Response>} The response object to pass
++     *     to the user callback.
++     * options - {Object} The user options passed to the read call.
++     */
++    handleUnlock: function(response, options) {            	
++    	var request = response.priv;
++    	OpenLayers.Console.log("...transaction response...");
++    	OpenLayers.Console.dirxml(request.responseXML);
++    	// since it's actually an empty wfs:Transaction operation, reuse handleCommit()
++    	this.handleCommit(response, options);
++    },
++    
++    /**
++     * Method: handleCommit
++     * Called when the commit request returns.
++     * 
++     * Parameters:
++     * response - {<OpenLayers.Protocol.Response>} The response object to pass
++     *     to the user callback.
++     * options - {Object} The user options passed to the commit call.
++     */
++    handleCommitWithLock: function(response, options) {
++    	var request = response.priv;
++    	OpenLayers.Console.log("...transaction response...");
++    	OpenLayers.Console.dirxml(request.responseXML);
++        this.handleCommit(response, options);
++    },
++     
++    CLASS_NAME: "OpenLayers.Protocol.WFS2.v1" 
++});
+Index: lib/OpenLayers/Protocol/WFS2/v1_0_0.js
+===================================================================
+--- lib/OpenLayers/Protocol/WFS2/v1_0_0.js	(revision 0)
++++ lib/OpenLayers/Protocol/WFS2/v1_0_0.js	(revision 0)
+@@ -0,0 +1,39 @@
++/**
++ * @requires OpenLayers/Protocol/WFS2/v1.js
++ * @requires OpenLayers/Format/WFST2/v1_0_0.js
++ */
++
++/**
++ * Class: OpenLayers.Protocol.WFS2.v1_0_0
++ * A WFS v1.0.0 protocol for vector layers.  Create a new instance with the
++ *     <OpenLayers.Protocol.WFS2.v1_0_0> constructor.
++ *
++ * Inherits from:
++ *  - <OpenLayers.Protocol.WFS2.v1>
++ */
++OpenLayers.Protocol.WFS2.v1_0_0 = OpenLayers.Class(OpenLayers.Protocol.WFS2.v1, {
++    
++    /**
++     * Property: version
++     * {String} WFS version number.
++     */
++    version: "1.0.0",
++    
++    /**
++     * Constructor: OpenLayers.Protocol.WFS2.v1_0_0
++     * A class for giving layers WFS v1.0.0 protocol.
++     *
++     * Parameters:
++     * options - {Object} Optional object whose properties will be set on the
++     *     instance.
++     *
++     * Valid options properties:
++     * featureType - {String} Local (without prefix) feature typeName (required).
++     * featureNS - {String} Feature namespace (optional).
++     * featurePrefix - {String} Feature namespace alias (optional - only used
++     *     if featureNS is provided).  Default is 'feature'.
++     * geometryName - {String} Name of geometry attribute.  Default is 'the_geom'.
++     */
++   
++    CLASS_NAME: "OpenLayers.Protocol.WFS2.v1_0_0" 
++});
+Index: lib/OpenLayers/Protocol/WFS2/v1_1_0.js
+===================================================================
+--- lib/OpenLayers/Protocol/WFS2/v1_1_0.js	(revision 0)
++++ lib/OpenLayers/Protocol/WFS2/v1_1_0.js	(revision 0)
+@@ -0,0 +1,43 @@
++/**
++ * @requires OpenLayers/Protocol/WFS2/v1.js
++ * @requires OpenLayers/Format/WFST2/v1_1_0.js
++ */
++
++/**
++ * Class: OpenLayers.Protocol.WFS2.v1_1_0
++ * A WFS v1.1.0 protocol for vector layers.  Create a new instance with the
++ *     <OpenLayers.Protocol.WFS2.v1_1_0> constructor.
++ *
++ * Differences from the v1.0.0 protocol:
++ *  - uses Filter Encoding 1.1.0 instead of 1.0.0
++ *  - uses GML 3 instead of 2 if no format is provided
++ *  
++ * Inherits from:
++ *  - <OpenLayers.Protocol.WFS2.v1>
++ */
++OpenLayers.Protocol.WFS2.v1_1_0 = OpenLayers.Class(OpenLayers.Protocol.WFS2.v1, {
++    
++    /**
++     * Property: version
++     * {String} WFS version number.
++     */
++    version: "1.1.0",
++    
++    /**
++     * Constructor: OpenLayers.Protocol.WFS2.v1_1_0
++     * A class for giving layers WFS v1.1.0 protocol.
++     *
++     * Parameters:
++     * options - {Object} Optional object whose properties will be set on the
++     *     instance.
++     *
++     * Valid options properties:
++     * featureType - {String} Local (without prefix) feature typeName (required).
++     * featureNS - {String} Feature namespace (optional).
++     * featurePrefix - {String} Feature namespace alias (optional - only used
++     *     if featureNS is provided).  Default is 'feature'.
++     * geometryName - {String} Name of geometry attribute.  Default is 'the_geom'.
++     */
++   
++    CLASS_NAME: "OpenLayers.Protocol.WFS2.v1_1_0"
++});
+Index: lib/OpenLayers/Strategy/Lock.js
+===================================================================
+--- lib/OpenLayers/Strategy/Lock.js	(revision 0)
++++ lib/OpenLayers/Strategy/Lock.js	(revision 0)
+@@ -0,0 +1,443 @@
++/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
++ * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
++ * full text of the license. */
++
++/**
++ * @requires OpenLayers/Strategy.js
++ */
++
++/**
++ * Class: OpenLayers.Strategy.Lock
++ * A simple strategy that deal with lock/unlock features and make sure feature are locked before modified
++ *     
++ *
++ * Inherits from:
++ *  - <OpenLayers.Strategy>
++ */
++OpenLayers.Strategy.Lock = OpenLayers.Class(OpenLayers.Strategy, {
++    
++    /**
++     * Property: response
++     * {<OpenLayers.Protocol.Response>} The protocol response object returned
++     *      by the layer protocol.
++     */
++    response: null,
++
++    /**
++     * 
++     */
++    lockedFeatures: [],
++    
++    /**
++     * 
++     */
++    _styleMap: null,
++    
++    /**
++     * Constructor: OpenLayers.Strategy.Lock
++     * Create a new Lock strategy.
++     *
++     * Parameters:
++     * options - {Object} Optional object whose properties will be set on the
++     *     instance.
++     */
++    initialize: function(options) {
++        OpenLayers.Strategy.prototype.initialize.apply(this, [options]);        
++    },
++    
++    /**
++     * Method: activate
++     * TODO: doc
++     * 
++     * Returns:
++     * {Boolean} The strategy was successfully activated.
++     */
++    activate: function() {
++        /**
++         * check if vector layer protocol supports necessary interfaces for Lock strategy
++         * 
++         * necessary protocol interfaces:
++         * 		'readWithLock' read features from server and lock them at the same time 		
++         * 		'unlock' unlock features that were locked on server 
++         */
++    	var canReadWithLock = (typeof this.layer.protocol.readWithLock == "function") ? true : false;
++    	var canUnLock = (typeof this.layer.protocol.unlock == "function") ? true : false;
++    	if(!this.layer.protocol || canReadWithLock == false || canUnLock == false) {
++    		OpenLayers.Console.error("...can not activate Lock strategy...vector layer protocol does not support readWithLock or unlock interfaces...");
++    		return false;
++    	}
++    	// call activate on parent class 
++    	var activated = OpenLayers.Strategy.prototype.activate.call(this);
++        if(activated) {
++            // add two more event related to lock\unlock features
++        	this.layer.events.addEventType("afterfeatureslocked");
++        	this.layer.events.addEventType("afterfeaturesunlocked");
++        	
++        	// add getFeatureByFid() function to vector layer
++        	// TODO: move this method to vector layer
++        	this.layer.getFeatureByFid = OpenLayers.Function.bind(
++    			function(fid) {
++            		var feature = null;
++                    for(var i=0, len=this.features.length; i<len; ++i) {
++                        if(this.features[i].fid && this.features[i].fid == fid) {
++                            feature = this.features[i];
++                            break;
++                        }
++                    }
++                    return feature;
++            	},
++            	this.layer
++        	);   
++        	
++        	// add getSelectedFeatureByFid function to vector layer
++        	// TODO: move this method to vector layer
++        	this.layer.getSelectedFeatureByFid = OpenLayers.Function.bind(
++    			function(fid) {
++            		var feature = null;
++                    for(var i=0, len=this.selectedFeatures.length; i<len; ++i) {
++                        if(this.selectedFeatures[i].fid && this.selectedFeatures[i].fid == fid) {
++                            feature = this.selectedFeatures[i];
++                            break;
++                        }
++                    }
++                    return feature;
++            	},
++            	this.layer
++        	);      
++        	
++        	// register listener on following layer events
++        	this.layer.events.on({  
++        		"beforefeatureselected": this.synchronizeFeaturesStyle,
++        		"featureselected": this.synchronizeFeaturesStyle,
++        		"featureunselected": this.synchronizeFeaturesStyle,
++        		"afterfeatureslocked": this.synchronizeFeatures,
++                "afterfeaturesunlocked": this.synchronizeFeatures,
++                scope: this
++            });
++        	
++        	// initialize styles for locked/unlocked features
++        	this._styleMap = this.layer.styleMap || new OpenLayers.StyleMap();         	
++        	this._defaultStyle = this._styleMap.styles['default'];
++        	this._selectStyle = this._styleMap.styles['select'];        	
++        	if(this.options && this.options.styleMap) {
++        		this._lockedStyle = this.options.styleMap.styles['locked'] || this._styleMap.styles['temporary'];
++        	} else {
++				this._lockedStyle = this._styleMap.styles['temporary'];
++			}         	
++        }
++        return activated;
++    },
++    
++    /**
++     * Method: deactivate
++     * Tear down strategy
++     * 
++     * Returns:
++     * {Boolean} The strategy was successfully deactivated.
++     */
++    deactivate: function() {
++        var deactivated = OpenLayers.Strategy.prototype.deactivate.call(this);
++        if(deactivated) {
++        	// remove getFeatureByFid() method from vector layer
++        	this.layer.getFeatureByFid = null;        	
++        	// TODO: doc        	
++        	this.layer.events.un({    
++        		"beforefeatureselected": this.synchronizeFeaturesStyle,
++        		"featureselected": this.synchronizeFeaturesStyle,
++        		"featureunselected": this.synchronizeFeaturesStyle,
++                "afterfeatureslocked": this.synchronizeFeatures,
++                "afterfeaturesunlocked": this.synchronizeFeatures,
++                scope: this
++            });
++        	// remove internal styles
++        	this._styleMap = null;
++        	this._defaultStyle = null;
++        	this._selectStyle = null;
++        	this._lockedStyle = null;        	
++        }
++        return deactivated;
++    },
++    
++    /**
++     * Method: isFeatureLocked
++     * 
++     * Return: {boolean} - if input feature has a 'lockId' or not 
++     */
++    isFeatureLocked: function(/* OpenLayers.Feature.Vector */feature) {    	
++    	if(feature.lockId && feature.lockId !== "") {
++    		OpenLayers.Console.log("...feature: " + feature.fid + "...is locked with lockId: " + feature.lockId + "...");
++        	return true;
++    	} else {
++    		OpenLayers.Console.log("...feature: " + feature.fid + "...is not locked...");
++    		return false;
++    	}    	
++    },
++    
++    /**
++     * Method: lockFeatures
++     * 
++     * lock features at server-side 
++     *   and read/synchronize locked feature at client-side
++     */
++    lockFeatures: function(/* [OpenLayers.Feature.Vector] */features) {
++    	if(this.active == true) {
++	    	// create 'FeatureId' or 'BBOX' filter
++	    	var featureIdfilter = this.createFeatureIdFilter(features);
++	    	//var filter = this.createBBOXFilter(bounds);
++	        
++	    	if(this.response && this.response.priv && typeof this.response.priv.abort == "function") {
++	            this.response.priv.abort();
++	        }        
++	        // call readWithLock() from WFST2 protocol
++	        this.response = this.layer.protocol.readWithLock({
++	            filter: featureIdfilter,
++	            callback: this.onFeaturesLocked,
++	            scope: this
++	        });
++    	} else {
++    		OpenLayers.Console.error("...can not call lockFeatures...Lock strategy is not activated...");
++    		throw "...can not call lockFeatures...Lock strategy is not activated...";
++    	}
++    },
++    
++    /**
++     * Method: lockFeaturesWithinExtent
++     * 
++     * lock features within current visible extent at server-side 
++     *   and read/synchronize locked feature at client-side
++     */
++    lockFeaturesWithinExtent: function(/* [OpenLayers.Feature.Vector] */features) {
++    	// TODO: to be implemented
++    },
++    
++    /**
++     * Method: unlockFeatures
++     * 
++     * release locked features at server-side 
++     *   and synchronize unlocked feature styles at client-side
++     */
++    unlockFeatures: function(/* [OpenLayers.Feature.Vector] */features) {    	    	             	
++    	if(this.active == true) {
++	    	if(this.response && this.response.priv && typeof this.response.priv.abort == "function") {
++	            this.response.priv.abort();
++	        }
++	    	// need separate empty 'wfs:Transaction' request for each different lockId
++	    	var lockIds = {};
++	    	for(var i=0; i<features.length; i++) {
++	    		var lockId = features[i].lockId;
++	    		if(lockId && lockIds[lockId] == null) {
++	    			lockIds[lockId] = lockId;
++	    		}
++	    	}
++	    	for(var key in lockIds) {
++		    	// call unlock() on vector layer protocol
++		    	this.response = this.layer.protocol.unlock({
++			    	lockId: lockIds[key],
++			    	callback: this.onFeaturesUnlocked,
++			    	scope: this
++		    	});
++	    	}
++    	} else {
++    		OpenLayers.Console.error("...can not call unlockFeatures...Lock strategy is not activated...");
++    		throw "...can not call unlockFeatures...Lock strategy is not activated...";
++    	} 
++    },
++    
++    /**
++     * Method: unlockAllFeatures
++     * 
++     * release all locked features at server-side
++     *   and synchronize unlocked feature styles at client-side
++     */
++    unlockAllFeatures: function() {
++    	this.unlockFeatures(this.lockedFeatures);
++    },
++    
++    /**
++     * Method: onFeaturesLocked
++     * TODO: doc
++     *
++     * Parameters:
++     * response - {<OpenLayers.Protocol.Response>} The response object passed
++     *      by the protocol.
++     */
++    onFeaturesLocked: function(response) {
++    	if(response.success() && response.features) {
++    		for(var i=0; i<response.features.length; i++) {
++    			var lockedFeature = response.features[i];
++    			if(lockedFeature.lockId && lockedFeature.lockId != "") {    				
++    				//OpenLayers.Console.log("...feature " + lockedFeature.fid + " is locked with lockId: " + response.features[i].lockId);    				
++    				//OpenLayers.Console.log("...feature id: " + lockedFeature.id);
++    				//OpenLayers.Console.log("...add locked features to lockedFeatures array..."); 
++    				this.lockedFeatures.push(lockedFeature);
++    			}
++    		}
++    		var evt = {};
++        	evt.features = response.features;
++        	this.layer.events.triggerEvent("afterfeatureslocked", evt);
++    	} else {
++    		OpenLayers.Console.log("...lock features failed...");
++    		// no event will be triggered beecause no features are locked
++    	}
++    },
++    
++    /**
++     * Method: onFeaturesUnlocked
++     * TODO: doc
++     * 
++     * Parameters:
++     * response - {<OpenLayers.Protocol.Response>} The response object passed
++     *      by the protocol.
++     */
++    onFeaturesUnlocked: function(response) {
++    	if(response.success()) {
++    		OpenLayers.Console.log("...locked features with lockId " + response.lockId + " are unlocked...");
++    		var evt = {
++	    		lockId: response.lockId	
++	    	};    	
++	    	this.layer.events.triggerEvent("afterfeaturesunlocked", evt);
++    	} else {
++    		OpenLayers.Console.log("...unlock features with lockId " + response.lockId + " failed...");
++    	}
++    },
++    
++    /**
++     * Method: synchronizeFeatures
++     * 
++     * synchronize locked/unlocked features at client-side
++     *   add/remove 'lockId', update feature style, update this.lockedFeatures array
++     */
++    synchronizeFeatures: function(evt) {    	
++    	//OpenLayers.Console.log(evt.type);
++    	switch(evt.type) {    		
++    		case "afterfeatureslocked":
++    			// use feature.fid to synchronize features between layer and this.lockedFeatures    		        		   		
++        		for(var i=0; i<this.lockedFeatures.length; i++) {
++            		var fid = this.lockedFeatures[i].fid;
++            		var lockedFeature = this.layer.getFeatureByFid(fid);
++            		if(lockedFeature) {
++            			// erase/destroy original feature (that locked) from layer
++            			this.layer.eraseFeatures([lockedFeature]);
++            			this.layer.removeFeatures([lockedFeature], {slient:false});            			            			
++            			// clone locked feature
++                		var clonedFeature = this.lockedFeatures[i].clone();            			
++                		// 'fid', 'lockId', and 'style' have to be cloned manually
++                		clonedFeature.fid = this.lockedFeatures[i].fid;
++                		clonedFeature.lockId = this.lockedFeatures[i].lockId;                   		
++                		clonedFeature.style = this._lockedStyle.createSymbolizer(clonedFeature);
++                		// add/redraw locked feature to layer
++            			this.layer.addFeatures([clonedFeature], {slient:false});            			
++            			//OpenLayers.Console.log("...redraw locked feature in layer with locked style...");            			        			            		
++            		}
++            	}
++        		OpenLayers.Console.log("...total features number: " + this.layer.features.length 
++        			+ "...locked features number: " + this.lockedFeatures.length
++        			+ "...selected features number: " + this.layer.selectedFeatures.length);
++    			break;
++    		case "afterfeaturesunlocked":
++    			// use feature.fid to synchronize features between layer and this.lockedFeatures    	       		
++        		var __featuresStillLocked = [];
++        		for(var i=0; i<this.lockedFeatures.length; i++) {    			
++        			var lockId = this.lockedFeatures[i].lockId;    			
++        			var fid = this.lockedFeatures[i].fid;
++        			if(lockId == evt.lockId) {
++        				var unlockedFeature = this.layer.getFeatureByFid(fid);
++        				// remove 'locked' style 
++        				unlockedFeature.style = null;
++        				// remove 'lockId'
++        				unlockedFeature.lockId = null;
++        				if(this.layer.getSelectedFeatureByFid(fid)) {        					
++        					this.layer.drawFeature(unlockedFeature, this._selectStyle.createSymbolizer(unlockedFeature));        					
++        				} else {
++        					this.layer.drawFeature(unlockedFeature, this._defaultStyle.createSymbolizer(unlockedFeature));
++        				}        				          			
++        			} else {
++        				// filter out unlocked features
++        				__featuresStillLocked.push(this.lockedFeatures[i]);
++        			}    			
++        		}    		
++        		//OpenLayers.Console.log("...remove unlocked features from lockedFeatures array...");
++        		this.lockedFeatures = null;
++        		this.lockedFeatures = __featuresStillLocked;
++        		OpenLayers.Console.log("...total features number: " + this.layer.features.length 
++            			+ "...locked features number: " + this.lockedFeatures.length
++            			+ "...selected features number: " + this.layer.selectedFeatures.length);
++    			break;
++    		default:
++    			break;
++    	}
++    },
++    
++    /**
++     * Method: synchronizeFeaturesStyle
++     * 
++     */
++    synchronizeFeaturesStyle: function(evt) {
++    	//OpenLayers.Console.log(evt.type);
++    	switch(evt.type) {			
++    		// before feature is selected set 'style' to null so that feature will rendered in 'select' style
++    		case "beforefeatureselected":
++				if(evt.feature.lockId && evt.feature.lockId != "") {        					
++					//OpenLayers.Console.log("...set locked feature 'style' to null...");
++					evt.feature.style = null;
++				}
++				break;
++			// after feature is selected  set 'style' back to 'locked' style so that feature will rendered in 'locked' style when refreshed
++			case "featureselected":
++				if(evt.feature.lockId && evt.feature.lockId != "") {        					
++					//OpenLayers.Console.log("...set locked feature 'style' back to 'locked'...");
++					evt.feature.style = this._lockedStyle.createSymbolizer(evt.feature);
++				}
++				break;
++			default:
++				//this.isFeatureLocked(evt.feature);
++				break;
++    	}
++    },
++
++    /****************************************************************************************
++     * utility methods for OpenLayers.Strategy.Lock
++     ****************************************************************************************/
++    
++    /**
++     * Method: createFeatureIdFilter
++     *
++     * Returns
++     * {<OpenLayers.Filter>} The filter object.
++     */
++    createFeatureIdFilter: function(features) {
++        var fids = [];
++        for(var i=0; i<features.length; i++) {
++        	if(features[i].fid) {
++        		fids.push(features[i].fid);
++        	}
++        }
++    	var filter = new OpenLayers.Filter.FeatureId({
++            fids: fids
++        });        
++        return filter;
++    },
++    
++    /**
++     * Method: createBBOXFilter
++     *
++     * Returns
++     * {<OpenLayers.Filter>} The filter object.
++     */
++    createBBOXFilter: function(bounds) {
++        // TODO: to be implemented
++    },
++    
++    /**
++     * Method: setStyleMap
++     */
++    setStyleMap: function(styleMap) {
++    	if(styleMap) {
++    		this._defaultStyle = styleMap.styles['default'] || this._defaultStyle;
++    		this._selectStyle = styleMap.styles['select'] || this._selectStyle;
++    		this._lockedStyle = styleMap.styles['locked'] || this._lockedStyle;
++    	}
++    },
++    
++    CLASS_NAME: "OpenLayers.Strategy.Lock" 
++});
+Index: lib/OpenLayers/Strategy/Save2.js
+===================================================================
+--- lib/OpenLayers/Strategy/Save2.js	(revision 0)
++++ lib/OpenLayers/Strategy/Save2.js	(revision 0)
+@@ -0,0 +1,198 @@
++/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
++ * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
++ * full text of the license. */
++
++/**
++ * @requires OpenLayers/Strategy.js
++ * @requires OpenLayers/Strategy/Save.js
++ */
++
++/**
++ * Class: OpenLayers.Strategy.Save2
++ * A strategy that commits modifications to all features upon the <saveWithLock>()
++ *     function call.
++ *
++ * Inherits from:
++ *  - <OpenLayers.Strategy.Save2>
++ */
++OpenLayers.Strategy.Save2 = OpenLayers.Class(OpenLayers.Strategy.Save, {
++
++    /**
++     * Constructor: OpenLayers.Strategy.Save2
++     * Create a new Save strategy.
++     *
++     * Parameters:
++     * options - {Object} Optional object whose properties will be set on the
++     *     instance.
++     */
++    initialize: function(options) {
++        OpenLayers.Strategy.Save.prototype.initialize.apply(this, [options]);
++    },
++    
++    /**
++     * Method: activate
++     * TODO: doc
++     * 
++     * Returns:
++     * {Boolean} The strategy was successfully activated.
++     */
++    activate: function() {
++    	/**
++         * check if vector layer protocol supports necessary interfaces for Save2 strategy
++         * 
++         * necessary protocol interfaces:
++         * 		'commitWithLock' commit modified features to server with a valid lockId 		         
++         */
++    	var canCommitWithLock = (typeof this.layer.protocol.commitWithLock == "function") ? true : false;
++    	if(!this.layer.protocol || canCommitWithLock == false) {
++    		OpenLayers.Console.error("...can not activate Save2 strategy...vector layer protocol does not support commitWithLock interface...");
++    		return false;
++    	}
++    	var activated = OpenLayers.Strategy.Save.prototype.activate.call(this);
++    	if(activated) {
++    		// register listener on following layer events
++        	this.layer.events.addEventType("transactionsucceeded");
++			this.layer.events.addEventType("transactionfailed");        	
++    	}
++    	return activated;
++    },
++    
++    /**
++     * Method: deactivate
++     * Tear down strategy
++     * 
++     * Returns:
++     * {Boolean} The strategy was successfully deactivated.
++     */
++    deactivate: function() {
++        var deactivated = OpenLayers.Strategy.Save.prototype.deactivate.call(this);
++        if(deactivated) {
++        	// do nothing
++        }
++        return deactivated;
++    },
++    
++    /**
++     * Method: saveWithLock
++     */
++    saveWithLock: function(features) {    	
++		if(this.active == true) {
++	    	if(!features){
++	            features = this.layer.features;
++	        }
++	        this.layer.protocol.commitWithLock(features, {
++	            callback: this.onSaveWithLock,
++	            scope: this
++	        });
++		} else {
++			OpenLayers.Console.error("...can not call saveWithLock...Save2 strategy is not activated...");
++			throw "...can not call saveWithLock...Save2 strategy is not activated...";
++		}
++    },
++
++    /**
++     * Method: onSaveWithLock
++     * 
++     * when modified features have been committed to server, synchronize modified features with server at client-side
++     */
++    onSaveWithLock: function(response) {
++    	// response.reqFeatures contains all updated/inserted/deleted features
++    	// response.lockId the common lockId response.reqFeatures have
++		// response.insertIds contains fid of all inserted features
++    	
++    	// if 'releaseAction' is 'ALL', release locked features no matter what
++    	if(this.layer.protocol.releaseAction == "ALL") {      		
++    		// since releaseAction = 'ALL' releases features at server-side, 
++    		//   so just trigger "afterfeaturesunlocked" event on layer
++    		var evt = {    			
++    			lockId: response.lockId
++    		};
++    		this.layer.events.triggerEvent("afterfeaturesunlocked", evt);    		
++    	} else if(this.layer.protocol.releaseAction == "SOME") {
++    		// TODO: difficult if fail to commit some of the features 
++    		//   because client-side can not differentiate which feature is released at server-side     		
++    	}    	
++    	if(response.success()) {
++    		OpenLayers.Console.log("...transaction succeeded...");    		    		
++    		// synchronize inserted/updated/deleted features
++    		var modifiedFeatures = response.reqFeatures;            
++            var state;
++            var modifiedFeature;
++            var toDestroy = [];
++            var toSynchronize = [];
++            for(var i=0, len=modifiedFeatures.length; i<len; ++i) {
++            	modifiedFeature = modifiedFeatures[i];
++                state = modifiedFeature.state;
++                if(state) {
++                    if(state == OpenLayers.State.DELETE) {
++                    	toDestroy.push(modifiedFeature);
++                    } else if (state == OpenLayers.State.UPDATE) {
++                    	toSynchronize.push(modifiedFeature);
++                    } else if (state == OpenLayers.State.INSERT) {
++                    	// do nothing
++                    }
++                    modifiedFeature.state = null;
++                }
++            }
++            // delete features which are deleted at server-side from map at client-side
++            OpenLayers.Console.log("...synchronize deleted features..." + "...features number: " + toDestroy.length);            
++            // if some feature failed to be deleted at server-side, it will be difficult to synchronize at client-side
++			//   because client-side has no idea which feaure has been deleted successfully, which were not.
++			if(toDestroy.length > 0) {            	
++                this.layer.destroyFeatures(toDestroy);
++            }
++            // to synchronize features
++            // newly inserted features should be synchronized
++        	
++            if(toSynchronize.length > 0 || response.insertIds.length > 0) {
++            	// inserted features should be synchronized
++				var fids = response.insertIds || [];				
++				// updated features should be synchronized
++            	for(var i=0; i<toSynchronize.length; i++) {
++                	if(toSynchronize[i].fid) {
++                		fids.push(toSynchronize[i].fid);
++                	}
++                }
++            	var featureIdFilter = new OpenLayers.Filter.FeatureId({
++                    fids: fids
++                });        
++            	// read insert/updated features from server-side and merge them into layer
++            	OpenLayers.Console.log("...synchronize inserted/updated features...features number: " + fids.length);
++            	this.layer.protocol.read({
++                    filter: featureIdFilter,
++                    callback: this.synchronizeFeatures,
++                    scope: this
++                });
++            }
++    	} else {
++    		OpenLayers.Console.log("...transaction failed...");
++			this.layer.events.triggerEvent("transactionfailed", {});
++    		// TODO: roll back?
++    	}
++    },
++    
++    /**
++     * Method: synchronizeFeatures
++     */
++    synchronizeFeatures: function(response) {
++        if(response.success() && response.features) {
++        	//OpenLayers.Console.log("...wfs:GetFeture response...");        	
++        	var synchronizedFeatures = response.features;
++        	var featuresToSyn = [];
++        	for(var i=0; i<synchronizedFeatures.length; i++) {
++        		var fid = synchronizedFeatures[i].fid; 
++        		var featureToSyn = this.layer.getFeatureByFid(fid);
++        		if(featureToSyn) {
++        			featuresToSyn.push(featureToSyn);					
++        		}
++        	}        	
++        	this.layer.destroyFeatures(featuresToSyn);        	
++        	this.layer.addFeatures(synchronizedFeatures);
++        	OpenLayers.Console.log("...inserted/updated features synchronized...features number: " + synchronizedFeatures.length);
++        	
++        	this.layer.events.triggerEvent("transactionsucceeded", {});
++		}
++    },
++ 
++    CLASS_NAME: "OpenLayers.Strategy.Save2" 
++});
+Index: playground/index.html
+===================================================================
+--- playground/index.html	(revision 9487)
++++ playground/index.html	(working copy)
+@@ -7,7 +7,8 @@
+     <body>    	 
+ 		<table border="0" cellspacing="0" style="margin-top:0px;margin-left:0px;">
+ 			<tr><td><a href="arcgis/index.html"><b>arcgis samples</b></a></td></tr>
+-			<tr><td><a href="geoext/styler.html"><b>geoext sld styler</b></a></td></tr>							
++			<tr><td><a href="geoext/styler.html"><b>geoext sld styler</b></a></td></tr>
++			<tr><td><a href="wfs/wfs2-protocol.html"><b>wfst with lock</b></a></td></tr>							
+ 		</table>
+     </body>
+ </html>
+Index: playground/wfs/wfs2-protocol.html
+===================================================================
+--- playground/wfs/wfs2-protocol.html	(revision 0)
++++ playground/wfs/wfs2-protocol.html	(revision 0)
+@@ -0,0 +1,18 @@
++<html xmlns="http://www.w3.org/1999/xhtml">
++    <head>
++        <title>openlayers vector behavior - wfs</title>
++        <link rel="stylesheet" href="../../theme/default/style.css" type="text/css"/>       
++        
++        <script src="../../lib/Firebug/firebug.js"></script>
++        <script src="../../lib/OpenLayers.js"></script>
++        <script src="wfs2-protocol.js"></script>
++    </head>
++    <body onload="init();">        
++        <div id="map" style="width: 1024px; height: 512px; margin-top: 5px; margin-left: 5px; background-color: #ffffff"></div>    		
++    	<input id="select_btn" type="button" value="select" onclick="deactivateModifyCtrl();"/>
++		<input id="modify_btn" type="button" value="edit" onclick="activateModifyCtrl();"/>			
++    	<input id="lock_btn" type="button" value="lock" onclick="lockFeatures();"/>
++		<input id="unlock_btn" type="button" value="unlock" onclick="unlockFeatures();"/>	
++    	<input id="commit_btn" type="button" value="commit" onclick="commit();"/>
++    </body>
++</html>
+Index: playground/wfs/wfs2-protocol.js
+===================================================================
+--- playground/wfs/wfs2-protocol.js	(revision 0)
++++ playground/wfs/wfs2-protocol.js	(revision 0)
+@@ -0,0 +1,346 @@
++var map;
++var wfs_layer;
++var bbox_strategy;
++var lock_strategy;
++var save_strategy;
++var modify_control;
++var select_control;
++var insert_control;
++        
++function init() {    
++	OpenLayers.ProxyHost= "/openlayers-2.8/ApacheProxyServlet?targetUrl=";
++    
++	var options = 	{
++		//panMethod: null, // set 'panMethod' to null to disable animated panning
++		controls: [
++       		new OpenLayers.Control.LayerSwitcher2(),
++       		new OpenLayers.Control.Navigation(),
++       		new OpenLayers.Control.PanZoom2(),
++       		new OpenLayers.Control.MousePosition()
++       	],
++        projection: "EPSG:4326",		        		        	
++   		maxResolution: 0.3515625,		        	        
++        maxExtent: new OpenLayers.Bounds(-180, -90, 180, 90),
++        
++   	};
++
++    map = new OpenLayers.Map('map', options);
++	
++    var base_layer = new OpenLayers.Layer.AgsTiled( 
++		"esri_street_map", 
++		"http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer/tile/", 
++		{					
++			tileSize: new OpenLayers.Size(512, 512),
++			tileFormat:'jpg',
++			tileOrigin: new OpenLayers.LonLat(-180, 90),
++			tileFullExtent: new OpenLayers.Bounds(-180, -90, 180, 90), 	
++			isBaseLayer: true,
++			buffer: 0,
++			singleTile: false					 					
++		}
++	); 
++    
++    /*
++    // use this when there is no internet connection
++    var base_layer = new OpenLayers.Layer.WMS(   
++	 	"sf_blockgroups", 
++		"http://sazabi:8079/geoserver-1.6.5/wms", 
++		{ 											
++			layers: 'esri:sf_blockgroups', // WMS layer name for 'counties' layer
++			styles: '',																											
++			srs: 'EPSG:4326',																																																									
++			format: 'image/png',											
++			transparent: true
++		},
++		{														
++			isBaseLayer: true,
++			singleTile: true,
++			displayOutsideMaxExtent: true														
++		}
++	);
++    */
++    map.addLayer(base_layer);
++
++    /*
++    // consume a WFS 1.0.0 service from GeoServer
++    var lon = 146.7;
++	var lat = -41.8;
++    var zoom = 6;
++        
++    var wfs_layer = new OpenLayers.Layer.Vector(
++    	"GeoServer WFS", 
++    	{
++    		strategies: [new OpenLayers.Strategy.BBOX()],
++    		protocol: new OpenLayers.Protocol.WFS(
++    			{    				
++    				url: "http://publicus.opengeo.org/geoserver/wfs",
++    				featureType: "tasmania_roads",
++    				featureNS: "http://www.openplans.org/topp"
++    			}
++    		),
++    	}
++    );
++    */    
++    
++    // consume a WFS 1.1.0 service from ArcGIS Server
++    var lon = -122.391667;
++	var lat = 37.760628;
++    var zoom = 10;
++    
++    bbox_strategy = new OpenLayers.Strategy.BBOX()
++    // lock_strategy will be used by GUI to sent lock feature request
++    lock_strategy = new OpenLayers.Strategy.Lock();
++    // save_strategy will be used by GUI to send transaction request
++    save_strategy = new OpenLayers.Strategy.Save2();
++    
++    wfs_layer = new OpenLayers.Layer.Vector(
++    	"arcgis server wfs ", 
++    	{
++    		strategies: [
++    		    bbox_strategy,
++    		    lock_strategy,
++    		    save_strategy
++    		],
++    		protocol: new OpenLayers.Protocol.WFS2(    			    			    				
++    			{
++    				url: "http://sazabi/arcgis/services/sanfrancisco_wfst/GeoDataServer/WFSServer?",    				
++    				format: new OpenLayers.Format.WFST2({
++        				//version: "1.1.0",
++    					srsName: "urn:x-ogc:def:crs:EPSG:6.9:4326",
++    					schema: "http://sazabi/arcgis/services/sanfrancisco_wfst/GeoDataServer/WFSServer?service=WFS&request=DescribeFeatureType&version=1.1.0&typename=esri:pizzastores",
++    					featureType: "pizzastores",
++    					//schema: "http://sazabi/arcgis/services/sanfrancisco_wfst/GeoDataServer/WFSServer?service=WFS&request=DescribeFeatureType&version=1.1.0&typename=esri:highways",
++    					//featureType: "highways",
++    					//schema: "http://sazabi/arcgis/services/sanfrancisco_wfst/GeoDataServer/WFSServer?service=WFS&request=DescribeFeatureType&version=1.1.0&typename=esri:blockgroups",
++    					//featureType: "blockgroups",
++    					geometryName: "Shape",																		
++						featureNS: "http://www.esri.com",
++    					featurePrefix: "esri",
++    					//maxFeatures: 49,
++    					extractAttributes: false,
++    					//xy: false,
++    					lockExpiry: "1",
++        				releaseAction: "ALL",
++						// propertyNames: "", array of string to list properties to be returned
++    				})
++        			
++    				/*
++    				// another way to initialize WFS protocol by passing all options
++    				// options for WFST format go into 'formatOptions'
++    				url: "http://sazabi/arcgis/services/sanfrancisco/MapServer/WFSServer",  			
++					version: "1.1.0",
++					srsName: "EPSG:4326",
++					schema: "http://sazabi/arcgis/services/sanfrancisco/MapServer/WFSServer?service=WFS&request=DescribeFeatureType&version=1.1.0&typename=esri:pizzastores",
++					featureType: "pizzastores",
++					geometryName: "Shape",
++					featureNS: "http://www.esri.com/wfst",
++					featurePrefix: "esri",
++					formatOptions: {
++						xy: false
++					}
++    				*/
++    			})    			
++    	}
++    );
++    wfs_layer.setVisibility(false);
++    map.addLayer(wfs_layer);
++    
++    //
++    wfs_layer.events.on({    	
++    	"featureselected": toggleLockBtns,
++    	"featureunselected": disableLockBtns,
++    	"afterfeatureslocked": disableLockBtns,
++    	"afterfeaturesunlocked": disableLockBtns
++    });
++    
++    // create, add and activate the SelectFeature control
++    
++    select_control = new OpenLayers.Control.SelectFeature(
++    	wfs_layer,
++    	{
++    		clickout: false,
++    		toggle: true,
++			multiple: true
++    	}
++    );
++    map.addControl(select_control);
++    select_control.activate();
++    
++    
++    // create, add and activate the DragFeature control
++    /*
++    drag_control = new OpenLayers.Control.DragFeature(
++    	wfs_layer,
++    	{
++    	
++    	}
++    );
++    map.addControl(drag_control);
++    drag_control.activate();
++    */
++    
++    // create, add and activate the ModifyFeature control       
++    modify_control = new OpenLayers.Control.ModifyFeature2(
++    	wfs_layer,
++    	{    		
++    		mode: OpenLayers.Control.ModifyFeature2.RESHAPE | OpenLayers.Control.ModifyFeature2.ROTATE, // to rotate and reshape the feature
++			//mode: OpenLayers.Control.ModifyFeature2.DELETE, // to delete the feature
++			/*
++    		geometryTypes:[
++    		    "OpenLayers.Geometry.Point",
++    		    "OpenLayers.Geometry.LineString",
++    		    "OpenLayers.Geometry.Polygon"
++    		],
++    		*/
++    		//clickout: false,
++    		//toggle: true
++    	}
++    );    
++    map.addControl(modify_control);
++    //modify_control.activate();	
++    
++	// create, add and activate the DrawFeature control
++	insert_control = new OpenLayers.Control.DrawFeature(
++		wfs_layer,
++		OpenLayers.Handler.Point,
++		//OpenLayers.Handler.Path,
++		//OpenLayers.Handler.Polygon,
++		//OpenLayers.Handler.MultiPath,
++		//OpenLayers.Handler.MultiPolygon,
++		{
++			//handlerOptions: {} 
++		}
++	);
++	//map.addControl(insert_control);
++    //insert_control.activate();
++	
++    map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);
++    
++    // load basic styles for vector layer
++    OpenLayers.loadURL("http://sazabi:8080/openlayers-2.7/slds/openlayers/gmaps-styles.xml", null, null, onStylesLoad);
++}
++
++function onStylesLoad(request) {
++	var sld_format = new OpenLayers.Format.SLD();
++	// 
++	var sld = sld_format.read(request.responseXML || request.responseText);
++	
++	var point_basic = sld.namedLayers["point"].userStyles[0];
++	var point_red_marker = sld.namedLayers["point"].userStyles[1]; // red gmaps style marker
++	var point_blue_marker = sld.namedLayers["point"].userStyles[2]; // blue gmaps style marker
++	var point_gold_marker = sld.namedLayers["point"].userStyles[3]; // gold gmaps style marker
++	
++	var polyline_basic = sld.namedLayers["polyline"].userStyles[0];
++	var polyline_red = sld.namedLayers["polyline"].userStyles[1];
++	var polyline_blue = sld.namedLayers["polyline"].userStyles[2];
++	var polyline_gold = sld.namedLayers["polyline"].userStyles[3];
++	
++	var polygon_basic = sld.namedLayers["polygon"].userStyles[0];
++	var polygon_blue = sld.namedLayers["polygon"].userStyles[1];
++	var polygon_red = sld.namedLayers["polygon"].userStyles[2];
++		
++	var shadowStyle = {
++		backgroundGraphic: "http://sazabi:8080/openlayers-2.7/slds/openlayers/images/shadow.png",            
++        backgroundXOffset: 0,
++        backgroundYOffset: -7,
++        graphicZIndex: 11,
++        backgroundGraphicZIndex: 10,	
++	};
++	// this is only a trick to overwrite rendering parameters for background graphics
++	point_red_marker.setDefaultStyle(shadowStyle);
++	point_blue_marker.setDefaultStyle(shadowStyle);
++	point_gold_marker.setDefaultStyle(shadowStyle);
++	
++	wfs_layer.styleMap = new OpenLayers.StyleMap({
++		// point geometry layer
++		'default': point_gold_marker,
++		'select': point_blue_marker
++		
++		// polyline geometry layer
++		//'default': polyline_gold,
++		//'select': polyline_blue
++		
++		// polygon geometry layer
++		//'default': polygon_basic,
++		//'select': polygon_blue,
++				
++	});	
++
++	lock_strategy.setStyleMap(
++		new OpenLayers.StyleMap({
++			// point geometry layer
++			'default': point_gold_marker,
++			'select': point_blue_marker,
++			'locked': point_red_marker
++			
++			// polyline geometry layer
++			//'default': polyline_gold,
++			//'select': polyline_blue,
++			//'locked': polyline_red	
++			
++			// polygon geometry layer
++			//'default': polygon_basic,
++			//'select': polygon_blue,
++			//'locked': polygon_red			
++		})
++	);	
++	
++	//wfs_layer.styleMap.styles["default"] = point_basic;
++	//wfs_layer.styleMap.styles["default"] = polyline_basic;
++	//wfs_layer.styleMap.styles["default"] = polygon_basic;
++	
++	wfs_layer.setVisibility(true);
++	wfs_layer.refresh(); //it actually does wfs_layer.events.triggerEvent("refresh");
++	
++	document.getElementById("lock_btn").disabled = true;
++	document.getElementById("unlock_btn").disabled = true;
++	document.getElementById("select_btn").disabled = true;
++	document.getElementById("commit_btn").disabled = false;
++}
++
++function lockFeatures() {
++	if(wfs_layer.selectedFeatures.length > 0) {
++		lock_strategy.lockFeatures(wfs_layer.selectedFeatures);
++	}
++}
++
++function unlockFeatures() {
++	lock_strategy.unlockAllFeatures();
++}
++
++function toggleLockBtns(evt) {
++	//OpenLayers.Console.log(evt.type);
++	//OpenLayers.Console.log(evt.feature.id);
++	var feature = evt.feature;
++	if(lock_strategy.isFeatureLocked(feature)) {
++		document.getElementById("lock_btn").disabled = true;
++		document.getElementById("unlock_btn").disabled = false;
++	} else {
++		document.getElementById("lock_btn").disabled = false;
++		document.getElementById("unlock_btn").disabled = true;
++	}
++}
++
++function disableLockBtns(evt) {
++	document.getElementById("lock_btn").disabled = true;
++	document.getElementById("unlock_btn").disabled = true;
++}
++
++function activateModifyCtrl(evt) {
++	select_control.deactivate();
++	modify_control.activate();
++	document.getElementById("select_btn").disabled = false;
++	document.getElementById("modify_btn").disabled = true;
++}
++
++function deactivateModifyCtrl(evt) {
++	modify_control.deactivate();
++	select_control.activate();	
++	document.getElementById("select_btn").disabled = true;
++	document.getElementById("modify_btn").disabled = false;
++}
++
++function commit() {
++	save_strategy.saveWithLock();
++}
++

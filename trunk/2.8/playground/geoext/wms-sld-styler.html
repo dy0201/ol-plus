@@ -1,0 +1,69 @@
+<html>
+<head>
+    <title>SLD Styler2</title>
+	<link rel="stylesheet" type="text/css" href="../../../../ext/ext-geoext/resources/css/ext-all.css" />    
+    <link rel="stylesheet" type="text/css" href="../../../../ext/ext-geoext/resources/css/xtheme-gray.css" />
+	
+    <link rel="stylesheet" type="text/css" href="../../../../geoext/apps/styler2/playground/externals/ux/colorpicker/color-picker.ux.css" />
+	<link rel="stylesheet" type="text/css" href="../../../../geoext/apps/styler2/playground/theme/css/styler.css" />
+    
+	<link rel="stylesheet" type="text/css" href="../../theme/default/style.css" />
+	
+	<style type="text/css">
+        .body {
+            padding-left:0px;
+			padding-top:0px;
+			margin-top:0px;
+			margin-left:0px;
+        }
+    </style>  
+	
+	<!--
+    <script type="text/javascript" src="../../../../geoext/apps/styler2/playground/externals/ext/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../../../../geoext/apps/styler2/playground/externals/ext/ext-all.js"></script>
+    -->
+	
+	<script type="text/javascript" src="../../../../ext/ext-geoext/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../../../../ext/ext-geoext/ext-all.js"></script>
+	
+	<script type="text/javascript" src="../../../../geoext/apps/styler2/playground/externals/ux/colorpicker/color-picker.ux.js"></script>
+    
+	<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+    <script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+		
+	<script type="text/javascript" src="js-include.js"></script>
+	<script type="text/javascript" src="wms-sld-styler.js"></script>
+</head>
+
+<body onload="init();" class="body">
+	<!--
+	<table>
+		<tr>
+			<td>
+				<div id="banner" style="width:1024px;height:64px;margin-top:0px;margin-left:0px;background-color:#ffffff">
+					<strong>Headline</strong>
+				</div>		
+			</td>
+		</tr>
+	</table>
+	-->
+	<table>
+		<tr>
+			<td>
+				<table>
+					<tr>
+						<td><div id="layerTree" style="width:256px;height:256px;margin-top:0px;margin-left:0px;background-color:#ffffff"></div></td>
+					</tr>
+					<tr>
+						<td><div id="legend" style="width:256px;height:256px;margin-top:0px;margin-left:0px;background-color:#ffffff"></div></td>
+					</tr>
+				</table>	
+			</td>
+			<td>
+				<div id="map" style="width:768px;height:512px;margin-top:0px;margin-left:0px;background-color:#ffffff"></div>			
+			</td>
+		</tr>
+	</table>
+</body>
+
+</html>

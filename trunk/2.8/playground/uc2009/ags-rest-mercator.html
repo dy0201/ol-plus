@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>ArcGIS93Rest Layer Sample</title>
+		
+		<!-- local OpenLayers library -->
+		<!--
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+		-->
+		
+		<!-- OpenLayers library hosted on http://august-openlayers.appspot.com/ -->
+		<script type="text/javascript" src="http://august-openlayers.appspot.com/openlayers/2.8+/OpenLayers.js"></script>
+		
+		<!-- Google Earth library -->
+		<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA44VqMzKOlUj3kMMbZwNyDRS2nFH0oxkLXf80zdSdn2DIS_Gs0xTX8zqwXJD4_AlLhrp5vOwM0M9hEw'></script>
+				  
+		<script type="text/javascript">
+			var map;
+			var ags_map_service;
+			
+			function init() {
+				var lon = -122.6335; 
+				var lat = 45.4447;
+										
+				var center_mercator = OpenLayers.Layer.SphericalMercator.forwardMercator(lon, lat);
+				center_mercator_x = center_mercator.lon;
+				center_mercator_y = center_mercator.lat;
+				
+				var zoom = 5;
+				
+				var options = 	{									
+					                //panMethod: null, // set 'panMethod' to null to disable animated panning
+									controls: [		      
+										new OpenLayers.Control.LayerSwitcher2(),
+							       		new OpenLayers.Control.Navigation(),
+										new OpenLayers.Control.PanZoom2(),
+							       		new OpenLayers.Control.MousePosition()
+							       	],
+									projection: "EPSG:900913",
+							        units: "m",
+							        maxResolution: 156543.0339,
+							        maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34),
+									tileSize: new OpenLayers.Size(512,512)
+								};	
+											
+				map = new OpenLayers.Map('map', options);
+										
+				var satellite = new OpenLayers.Layer.Google( 
+																"Google Satellite", 
+																{	
+																	type: G_SATELLITE_MAP,
+																	'sphericalMercator': true, 
+																	'maxZoomLevel':18
+																}
+														   );
+					
+				var physical = new OpenLayers.Layer.Google( 
+																"Google Terrain", 
+																{
+																	type: G_PHYSICAL_MAP, 
+																	'sphericalMercator': true,
+																	'maxZoomLevel':18
+																}
+														   );										  																	 
+				
+				map.addLayer(satellite);
+				map.addLayer(physical);	
+				
+				ags_map_service = new OpenLayers.Layer.ArcGIS93Rest(   
+													"United States", 
+													"http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer/export?", 										
+													{ 											
+														LAYERS: 'show:0,1,2',																			
+														IMAGESR: '102113',
+														BBOXSR: '102113',																																																									
+														FORMAT: 'png',											
+														TRANSPARENT: true
+													},
+													{														
+														isBaseLayer: false,
+														singleTile: true												
+													}
+												);												 
+				ags_map_service.setVisibility(false);
+				ags_map_service.setOpacity(0.75);						
+				map.addLayer(ags_map_service);	
+				
+				map.setCenter(new OpenLayers.LonLat(center_mercator_x, center_mercator_y), zoom);		
+			}
+			
+			function enableFilter() {
+	            ags_map_service.setLayerFilter(2, "STATE_NAME LIKE '%" + document.getElementById('filterValueField').value + "%'");
+	            ags_map_service.redraw();
+	        }
+			
+	        function disableFilter() {
+	            ags_map_service.setLayerFilter(2, null);
+	            ags_map_service.redraw();
+	        }
+			
+	        function updateButton() {
+	            document.getElementById('filterButton').value = "Show '" +
+	            document.getElementById('filterValueField').value + "' States";
+	        }
+			
+		</script>		
+	</head>
+    <body onload="init();">
+		<div id="map" style="width:1024px;height:512px;margin-top:5px;margin-left:5px;background-color:#ffffff"></div>
+		<input id="filterValueField" type="textfield" value="California"/>
+    	<input id="filterButton" type="button" onclick="enableFilter();" value="Filter States"/>
+    	<input type="button" onclick="disableFilter();" value="Show All States"/>
+    </body>
+</html>

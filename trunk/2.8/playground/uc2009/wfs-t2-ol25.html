@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>OpenLayer WFST</title>
+		
+		<link rel="stylesheet" type="text/css" href="http://august-openlayers.appspot.com/ext/ext-2.2.1/resources/css/ext-all.css" />
+		  	  		
+		<!-- OpenLayers library v2.5+ hosted on http://august-openlayers.appspot.com/ -->
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="http://august-openlayers.appspot.com/openlayers/2.5+/OpenLayers.js"></script>
+			
+		<!-- Google Earth library -->
+		<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA44VqMzKOlUj3kMMbZwNyDRS2nFH0oxkLXf80zdSdn2DIS_Gs0xTX8zqwXJD4_AlLhrp5vOwM0M9hEw'></script>
+		
+		<!-- Ext library -->
+		<script type="text/javascript" src="http://august-openlayers.appspot.com/ext/ext-2.2.1/adapter/ext/ext-base.js"></script>
+		<script type="text/javascript" src="http://august-openlayers.appspot.com/ext/ext-2.2.1/ext-all.js"></script>		
+
+		<!-- other JavaScript library -->
+		<script type="text/javascript" src="wfs-t2-ol25.js"></script>		
+		<script type="text/javascript" src="wfs-t2-ol25-ext.js"></script>
+
+	</head>
+    <body onload="init();">    	 
+		<table border="0" cellspacing="0" style="margin-top:0px;margin-left:0px;">
+			<tr>
+				<td>
+					<table border="0" cellspacing="0" style="margin-top:0px;margin-left:0px;">
+						<tr>
+							<td>
+								<div id="toolbar-container" style="width:1000px;margin-top:5px;margin-left:5px;">
+						    		<div id="toolbar"></div>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table border="0" cellspacing="0" style="margin-top:0px;margin-left:0px;">
+						<tr>
+							<td>
+								<div id="map" style="width:1000px;height:600px;margin-top:5px;margin-left:5px;background-color:#ffffff">
+								</div>
+							</td>
+							<td>
+								<div id="attributes" style="width:260px;height:600px;margin-top:5px;margin-left:5px;background-color:#ffffff"></div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!--  
+		<div id="toolbar-container" style="width:1024px;margin-top:5px;margin-left:5px;">
+    		<div id="toolbar"></div>
+		</div> 
+		<div id="map" style="width:1024px;height:512px;margin-top:5px;margin-left:5px;background-color:#ffffff">
+		</div>
+		-->
+    </body>
+</html>

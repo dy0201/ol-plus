@@ -1,0 +1,24 @@
+/**
+ * CSS
+ */
+
+/**
+ * Map Examples Specific
+ */
+.map_medium {
+    width: 			684px;
+    height: 		512px;
+    border: 		1px solid #ccc;
+    margin-top:		5px;
+    margin-left:	5px;
+    background-color:#ffffff;
+}
+
+.map_max {
+    width: 			100%;
+    height: 		100%;
+    border: 		1px solid #ccc;
+    margin-top:		5px;
+    margin-left:	5px;
+    background-color:#ffffff;
+}

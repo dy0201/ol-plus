@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>AgsQueryTask Control Sample</title>
+
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+				
+		<!-- ArcGIS Server JavaScript library -->
+		<script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=1.3"></script>
+		
+		<script type="text/javascript">			
+			esriConfig.defaults.io.proxyUrl = "../../lib/OpenLayers/Util/ags-proxy.jsp";
+        	esriConfig.defaults.io.alwaysUseProxy = false;    		
+		</script>				  
+		<script type="text/javascript" src="agsQueryTask.js"></script>
+				
+	</head>
+    <body onload="init();">
+    	<p>
+			In "Draw" mode: hold Ctrl key and single-click on map to query the state contains the point;
+			<br>In "Select" mode: select an existing feature on map and dbl-click to query the state contains the existing point;
+			<br>Click "Draw Mode (click to toggle)" to toggle mode;
+			<br>See Firebug console for full list of query results;
+			<br>Click "Clean up" to clean up query results.
+		</p>
+		<div id="map" style="width:1024px;height:512px;margin-top:5px;margin-left:5px;background-color:#ffffff"></div>
+		<input id="toggle_mode_btn" type="button" value="Draw Mode (click to toggle)" onclick="toggleMode();"/>
+		<input id="clean_btn" type="button" value="Clean up" onclick="cleanup();"/>
+    </body>
+</html>

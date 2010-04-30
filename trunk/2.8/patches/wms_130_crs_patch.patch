@@ -1,0 +1,13 @@
+Index: lib/OpenLayers/Layer/WMS.js
+===================================================================
+--- lib/OpenLayers/Layer/WMS.js	(revision 9486)
++++ lib/OpenLayers/Layer/WMS.js	(working copy)
+@@ -231,7 +231,7 @@
+ 			this.params.CRS = null;
+ 		} else {
+ 			this.params.SRS = null;
+-			this.params.CRS = this.params.SRS || projectionCode;
++			this.params.CRS = this.params.CRS || projectionCode;
+ 		}
+         return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(
+                                                     this, arguments);

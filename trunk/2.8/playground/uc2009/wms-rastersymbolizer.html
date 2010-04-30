@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<link rel="stylesheet" href="../style.css" type="text/css" />
+		<title>WMS + SLD RasterSymbolizer</title>
+		
+		<!-- local OpenLayers library -->
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+		
+		<!-- OpenLayers library hosted on http://august-openlayers.appspot.com/ -->
+		<!--<script type="text/javascript" src="http://august-openlayers.appspot.com/openlayers/2.8+/OpenLayers.js"></script>-->
+		
+			
+		<!-- OpenLayers library 2.8+ Compressed -->
+		<!--
+		<script type="text/javascript" src="../../OpenLayers.js"></script>
+		-->
+		<!-- other JavaScript library --> 
+		<script type="text/javascript" src="wms-rastersymbolizer.js"></script>				
+
+	</head>
+    <body onload="init();">
+		<div id="map" class="map_medium">
+		</div>
+		<table>
+			<tr>
+				<td><input id="nothing_btn" type="button" value="Do nothing" onclick="donothing();"/></td>
+				<td><input id="channels_btn" type="button" value="Channels (0,1,2) -> RGB" onclick="doChannels();"/></td>
+				<td><input id="contrast_normalize_btn" type="button" value="Contrast Normalize" onclick="doContrastNormalize();"/></td>
+				<td><input id="shadedrelief_btn" type="button" value="Shadedrelief" onclick="doShadedrelief();"/></td>
+				<td><input id="colormap1_btn" type="button" value="Colormap Channel (gradual gray)" onclick="doColormap1();"/></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><input id="channels_reverse_btn" type="button" value="Channels (2,1,0) -> RGB" onclick="doChannelsReverse();"/></td>
+				<td><input id="contrast_histogram_btn" type="button" value="Contrast Histogram" onclick="doContrastHistogram();"/></td></td>
+				<td><input id="shadedrelief_channel_btn" type="button" value="Shadedrelief Channel (2)" onclick="doShadedreliefChannel();"/></td>
+				<td><input id="colormap2_btn" type="button" value="Colormap Channel (gradual red)" onclick="doColormap2();"/></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><input id="channels_mono_btn" type="button" value="Channels (1,1,1) -> RGB" onclick="doChannelsMono();"/></td>
+				<td><input id="contrast_gamma_btn" type="button" value="Contrast Gamma" onclick="doContrastGamma();"/></td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><!--<input id="channels_selection_btn" type="button" value="Channels (11,9,1) -> RGB" onclick="doChannelsSelection();"/>--></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+    </body>
+</html>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sld:StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/ogc" xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd">
+	<sld:NamedLayer>
+		<sld:Name>0</sld:Name>		
+		<sld:UserStyle>
+			<sld:Name>shadedrelief</sld:Name>
+			<sld:Title>shadedrelief</sld:Title>
+			<sld:FeatureTypeStyle>
+				<sld:FeatureTypeName>Feature</sld:FeatureTypeName>
+				<sld:Rule>
+					<sld:RasterSymbolizer>
+						<sld:Opacity>0.5</sld:Opacity>
+						<sld:ShadedRelief>
+							<sld:BrightnessOnly>1</sld:BrightnessOnly>
+							<sld:ReliefFactor>55</sld:ReliefFactor>
+						</sld:ShadedRelief>
+					</sld:RasterSymbolizer>
+				</sld:Rule>
+			</sld:FeatureTypeStyle>
+		</sld:UserStyle>
+		<sld:UserStyle>
+			<sld:Name>channels</sld:Name>
+			<sld:Title>channels</sld:Title>
+			<sld:FeatureTypeStyle>
+				<sld:FeatureTypeName>Feature</sld:FeatureTypeName>
+				<sld:Rule>
+					<sld:RasterSymbolizer>
+						<sld:Opacity>1.0</sld:Opacity>
+						<sld:ChannelSelection>
+							<sld:RedChannel>
+								<sld:SourceChannelName>1</sld:SourceChannelName>
+								<sld:ContrastEnhancement>
+									<sld:Normalize/>
+								</sld:ContrastEnhancement>
+							</sld:RedChannel>
+							<sld:GreenChannel>
+								<sld:SourceChannelName>1</sld:SourceChannelName>
+								<sld:ContrastEnhancement>
+									<sld:Normalize/>
+								</sld:ContrastEnhancement>
+							</sld:GreenChannel>
+							<sld:BlueChannel>
+								<sld:SourceChannelName>0</sld:SourceChannelName>
+								<sld:ContrastEnhancement>
+									<sld:Normalize/>
+								</sld:ContrastEnhancement>
+							</sld:BlueChannel>
+						</sld:ChannelSelection>
+					</sld:RasterSymbolizer>
+				</sld:Rule>
+			</sld:FeatureTypeStyle>
+		</sld:UserStyle>
+		<sld:UserStyle>
+			<sld:Name>colormap</sld:Name>
+			<sld:Title>colormap</sld:Title>
+			<sld:FeatureTypeStyle>
+				<sld:FeatureTypeName>Feature</sld:FeatureTypeName>
+				<sld:Rule>
+					<sld:RasterSymbolizer>
+						<sld:Opacity>1.0</sld:Opacity>
+						<sld:ChannelSelection>
+							<sld:GrayChannel>
+								<sld:SourceChannelName>1</sld:SourceChannelName>
+							</sld:GrayChannel>
+						</sld:ChannelSelection>												
+						<sld:ColorMap>
+							<sld:ColorMapEntry color="#000000" quantity="10" opacity="1.0"/>
+							<sld:ColorMapEntry color="#cc0000" quantity="125" opacity="1.0"/>
+							<sld:ColorMapEntry color="#ff0000" quantity="150" opacity="1.0"/>
+							<sld:ColorMapEntry color="#ffcc00" quantity="175" opacity="1.0"/>
+							<sld:ColorMapEntry color="#ccff00" quantity="300" opacity="1.0"/>
+							<sld:ColorMapEntry color="#ccffcc" quantity="425" opacity="1.0"/>
+							<sld:ColorMapEntry color="#00ffff" quantity="550" opacity="1.0"/>
+							<sld:ColorMapEntry color="#00ffcc" quantity="675" opacity="1.0"/>
+							<sld:ColorMapEntry color="#00ff00" quantity="800" opacity="1.0"/>
+							<sld:ColorMapEntry color="#ccccff" quantity="1025" opacity="1.0"/>
+							<sld:ColorMapEntry color="#ffffff" quantity="2055" opacity="1.0"/>
+						</sld:ColorMap>						
+					</sld:RasterSymbolizer>
+				</sld:Rule>
+			</sld:FeatureTypeStyle>
+		</sld:UserStyle>
+		<sld:UserStyle>
+			<sld:Name>contrast</sld:Name>
+			<sld:Title>contrast</sld:Title>
+			<sld:FeatureTypeStyle>
+				<sld:FeatureTypeName>Feature</sld:FeatureTypeName>
+				<sld:Rule>
+					<sld:RasterSymbolizer>
+						<sld:Opacity>1.0</sld:Opacity>
+						<sld:ContrastEnhancement>
+							<!--<sld:Normalize/>-->
+							<!--<sld:Histogram/>-->
+							<sld:GammaValue>0.5</sld:GammaValue>
+						</sld:ContrastEnhancement>
+					</sld:RasterSymbolizer>
+				</sld:Rule>
+			</sld:FeatureTypeStyle>
+		</sld:UserStyle>
+	</sld:NamedLayer>
+</sld:StyledLayerDescriptor>

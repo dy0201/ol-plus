@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<link rel="stylesheet" href="../style.css" type="text/css" />
+		<title>WMS + TIME</title>
+		
+		<!-- local OpenLayers library -->
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+		
+		<!-- OpenLayers library hosted on http://august-openlayers.appspot.com/ -->
+		<!--<script type="text/javascript" src="http://august-openlayers.appspot.com/openlayers/2.8+/OpenLayers.js"></script>-->
+			
+		<!-- OpenLayers library 2.8+ Compressed -->
+		<!--
+		<script type="text/javascript" src="../../OpenLayers.js"></script>
+		-->
+		<!-- other JavaScript library --> 
+		<script type="text/javascript" src="wms-time.js"></script>				
+
+	</head>
+    <body onload="init();">
+		<div id="time">Date: </div>
+		<div id="map" class="map_medium">
+		</div>
+		<table>
+			<tr>
+				<td><input id="start_btn" type="button" value="Start" onclick="start();"/></td>				
+				<td><input id="stop_btn" type="button" value="Stop" onclick="stop();"/></td>
+				<td><input id="previous_btn" type="button" value=" << " onclick="previous();"/></td>
+				<td><input id="next_btn" type="button" value=" >> " onclick="next();"/></td>				
+			</tr>						
+		</table>
+    </body>
+</html>

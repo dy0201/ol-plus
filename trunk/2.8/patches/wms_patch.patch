@@ -1,0 +1,21 @@
+Index: lib/OpenLayers/Layer/WMS.js
+===================================================================
+--- lib/OpenLayers/Layer/WMS.js	(revision 9484)
++++ lib/OpenLayers/Layer/WMS.js	(working copy)
+@@ -225,8 +225,14 @@
+      */
+     getFullRequestString:function(newParams, altUrl) {
+         var projectionCode = this.map.getProjection();
+-        this.params.SRS = (projectionCode == "none") ? null : projectionCode;
+-
++        //this.params.SRS = (projectionCode == "none") ? null : projectionCode;
++		if(!this.params || !this.params.VERSION || this.params.VERSION != "1.3.0") {
++			this.params.SRS = this.params.SRS || projectionCode;
++			this.params.CRS = null;
++		} else {
++			this.params.SRS = null;
++			this.params.CRS = this.params.SRS || projectionCode;
++		}
+         return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(
+                                                     this, arguments);
+     },

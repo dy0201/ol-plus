@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>AgsDynamic Layer Sample</title>
+
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+			  
+		<script type="text/javascript">
+			var map;
+			
+			function init() {
+				var lon = -122.6335; 
+				var lat = 45.4447;																		
+				var zoom = 5;
+				
+				OpenLayers.ProxyHost= "/openlayers/ApacheProxyServlet?targetUrl=";
+    
+			var options = 	{
+				//panMethod: null, // set 'panMethod' to null to disable animated panning
+				controls: [
+		       		new OpenLayers.Control.LayerSwitcher(),
+					//new OpenLayers.Control.LayerSwitcher2(),
+		       		new OpenLayers.Control.Navigation(),
+		       		new OpenLayers.Control.PanZoom(),
+					//new OpenLayers.Control.PanZoom2(),
+		       		new OpenLayers.Control.MousePosition()
+		       	],
+		        projection: "EPSG:4326",		        		        	
+		   		maxResolution: 0.3515625,		        	        
+		        maxExtent: new OpenLayers.Bounds(-180, -90, 180, 90),
+		        
+		   	};
+		
+		    map = new OpenLayers.Map('map', options);
+			
+		    var base_layer = new OpenLayers.Layer.AgsTiled( 
+				"esri_street_map", 
+				"http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_Imagery_World_2D/MapServer/tile/", 
+				{					
+					tileSize: new OpenLayers.Size(512, 512),
+					tileFormat:'jpg',
+					tileOrigin: new OpenLayers.LonLat(-180, 90),
+					tileFullExtent: new OpenLayers.Bounds(-180, -90, 180, 90), 	
+					isBaseLayer: true,
+					buffer: 0,
+					singleTile: false					 					
+				}
+			); 
+		    map.addLayer(base_layer); 
+				
+				var ags_map_service = new OpenLayers.Layer.AgsDynamic(   
+													"United States", 
+													"http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer/Export?", 										
+													{ 											
+														LAYERS: 'show:0,1,2',																			
+														IMAGESR: '4326',
+														BBOXSR: '4326',																																																									
+														FORMAT: 'png',											
+														TRANSPARENT: true
+													},
+													{														
+														isBaseLayer: false,
+														singleTile: true												
+													}
+												);												 
+				ags_map_service.setVisibility(false);
+				ags_map_service.setOpacity(0.75);						
+				map.addLayer(ags_map_service);	
+				
+				map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);
+				
+				map.addControl(new OpenLayers.Control.LayerSwitcher());
+				map.addControl(new OpenLayers.Control.PanZoomBar());
+				map.addControl(new OpenLayers.Control.NavToolbar());		
+			}
+			
+		</script>		
+	</head>
+    <body onload="init();">
+		<div id="map" style="width:1024px;height:512px;margin-top:5px;margin-left:5px;background-color:#ffffff"></div>
+    </body>
+</html>

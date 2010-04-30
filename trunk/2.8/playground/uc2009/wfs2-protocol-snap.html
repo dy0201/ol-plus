@@ -1,0 +1,23 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>openlayers vector behavior - wfs</title>               
+        <link rel="stylesheet" href="../style.css" type="text/css"/> 
+        <!-- local OpenLayers library -->
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../OpenLayers.js"></script>
+		<!--<script type="text/javascript" src="../../lib/OpenLayers.js"></script>-->
+		
+		<!-- OpenLayers library hosted on http://august-openlayers.appspot.com/ -->
+		<!--<script type="text/javascript" src="http://august-openlayers.appspot.com/openlayers/2.8+/OpenLayers.js"></script>-->
+
+        <script src="wfs2-protocol-snap.js"></script>
+    </head>
+    <body onload="init();">        
+        <div id="map" class="map_medium"></div>    		
+    	<input id="select_btn" type="button" value="select" onclick="deactivateModifyCtrl();"/>
+		<input id="modify_btn" type="button" value="edit" onclick="activateModifyCtrl();"/>			
+    	<input id="lock_btn" type="button" value="lock" onclick="lockFeatures();"/>
+		<input id="unlock_btn" type="button" value="unlock" onclick="unlockFeatures();"/>	
+    	<input id="commit_btn" type="button" value="commit" onclick="commit();"/>
+    </body>
+</html>

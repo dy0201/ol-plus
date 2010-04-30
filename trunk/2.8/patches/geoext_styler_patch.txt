@@ -1,0 +1,30 @@
+WFS Patch:
+
+1. OpenLayers.Format.WFSCapabilities.v1 line: 57-60
+
+	when parsing the WFS GetCapabilities response, for each feature type name stripe the namespace prefix first;
+
+SLD Patch:
+
+1. OpenLayers.Format.SLD.v1 line: 136
+	Should be "this.getChildValue(node.firstChild)" instead of this.getChildName(node.firstChild)
+
+2. OpenLayers.Format.SLD.v1 line: 435 
+	Adding "sld" prefix when writing out "StyledLayerDescriptor" element
+
+
+3. OpenLayers.Format.SLD.v1 line: 452
+	Add "xmlns:ogc", and "xmlns:gml" declaration in root SLD element because of a known limit ArcGIS Server WMS SLD
+	    root.setAttribute("xmlns:ogc", this.namespaces.ogc);
+	    root.setAttribute("xmlns:gml", this.namespaces.gml);
+
+4. OpenLayers.Format.SLD.v1 line: 779
+
+	there could be two ways to write out a "radius" element, so add some comments
+
+
+Filter Patch:
+
+1. OpenLayers.Format.Filter.v1 line: 171, 182, 188
+	
+	Do not use OpenLayers.String.numericIf() when parsing "Literal", "LowerBoundary" and "UpperBoundary" because numeric value "0" will be striped

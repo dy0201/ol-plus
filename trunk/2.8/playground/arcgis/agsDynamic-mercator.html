@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>AgsDynamic Layer Sample</title>
+
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+		
+		<!-- Google Earth library -->
+		<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA44VqMzKOlUj3kMMbZwNyDRSUwqIfIQ6JFPfFD1ZcfKLPey_q8hQH-euV-MYp4ZdHZgBm9qwNA9FcIA'></script>
+				  
+		<script type="text/javascript">
+			var map;
+			
+			function init() {
+				var lon = -122.6335; 
+				var lat = 45.4447;
+										
+				var center_mercator = OpenLayers.Layer.SphericalMercator.forwardMercator(lon, lat);
+				center_mercator_x = center_mercator.lon;
+				center_mercator_y = center_mercator.lat;
+				
+				var zoom = 5;
+				
+				var options = 	{									
+					                projection: "EPSG:900913",
+							        units: "m",
+							        maxResolution: 156543.0339,
+							        maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34),
+									tileSize: new OpenLayers.Size(512,512)
+								};	
+											
+				map = new OpenLayers.Map('map', options);
+										
+				var satellite = new OpenLayers.Layer.Google( 
+																"Google Satellite", 
+																{	
+																	type: G_SATELLITE_MAP,
+																	'sphericalMercator': true, 
+																	'maxZoomLevel':18
+																}
+														   );
+					
+				var physical = new OpenLayers.Layer.Google( 
+																"Google Terrain", 
+																{
+																	type: G_PHYSICAL_MAP, 
+																	'sphericalMercator': true,
+																	'maxZoomLevel':18
+																}
+														   );										  																	 
+				
+				map.addLayer(satellite);
+				map.addLayer(physical);	
+				
+				var ags_map_service = new OpenLayers.Layer.AgsDynamic(   
+													"United States", 
+													"http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer/Export?", 										
+													{ 											
+														LAYERS: 'show:0,1,2',																			
+														IMAGESR: '102113',
+														BBOXSR: '102113',																																																									
+														FORMAT: 'png',											
+														TRANSPARENT: true
+													},
+													{														
+														isBaseLayer: false,
+														singleTile: true												
+													}
+												);												 
+				ags_map_service.setVisibility(false);
+				ags_map_service.setOpacity(0.75);						
+				map.addLayer(ags_map_service);	
+				
+				map.setCenter(new OpenLayers.LonLat(center_mercator_x, center_mercator_y), zoom);
+				
+				map.addControl(new OpenLayers.Control.LayerSwitcher());
+				map.addControl(new OpenLayers.Control.PanZoomBar());
+				map.addControl(new OpenLayers.Control.NavToolbar());
+				map.addControl(new OpenLayers.Control.MousePosition());		
+			}
+			
+		</script>		
+	</head>
+    <body onload="init();">
+		<div id="map" style="width:1024px;height:512px;margin-top:5px;margin-left:5px;background-color:#ffffff"></div>
+    </body>
+</html>

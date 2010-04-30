@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sld:StyledLayerDescriptor xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd" version="1.0.0">
+	<sld:NamedLayer>
+		<sld:Name>0</sld:Name>
+		<!-- raster emissive -->
+		<sld:UserStyle>
+			<sld:Name>channel_selection</sld:Name>
+			<sld:Title>channel_selection</sld:Title>
+			<sld:Abstract>channel_selection</sld:Abstract>
+			<sld:FeatureTypeStyle>
+				<sld:FeatureTypeName>Raster</sld:FeatureTypeName>
+				<sld:Rule>
+					<sld:Name>1_9_11</sld:Name>
+					<sld:Title>1_9_11</sld:Title>
+					<sld:RasterSymbolizer>
+						<sld:Opacity>1.0</sld:Opacity>
+						<sld:ChannelSelection>
+							<sld:RedChannel>
+								<sld:SourceChannelName>11</sld:SourceChannelName>
+							</sld:RedChannel>
+							<sld:GreenChannel>
+								<sld:SourceChannelName>9</sld:SourceChannelName>
+							</sld:GreenChannel>
+							<sld:BlueChannel>
+								<sld:SourceChannelName>1</sld:SourceChannelName>
+							</sld:BlueChannel>
+						</sld:ChannelSelection>
+					</sld:RasterSymbolizer>
+					<!-- TODO: RasterSymbolizer -->
+				</sld:Rule>
+				<!-- TODO: multiple Rules -->
+			</sld:FeatureTypeStyle>
+		</sld:UserStyle>
+		<sld:UserStyle>
+			<sld:Name>color_map</sld:Name>
+			<sld:Title>color_map</sld:Title>
+			<sld:Abstract>color_map</sld:Abstract>
+			<sld:FeatureTypeStyle>
+				<sld:FeatureTypeName>Feature</sld:FeatureTypeName>
+				<sld:Rule>
+					<sld:Name>11_colormap</sld:Name>
+					<sld:Title>11_colormap</sld:Title>
+					<sld:RasterSymbolizer>
+						<sld:Opacity>1.0</sld:Opacity>
+						<sld:ChannelSelection>
+							<sld:GrayChannel>
+								<sld:SourceChannelName>11</sld:SourceChannelName>
+							</sld:GrayChannel>
+						</sld:ChannelSelection>
+						<sld:ColorMap>
+							<sld:ColorMapEntry color="#0000ff" quantity="3189.0"/>
+							<sld:ColorMapEntry color="#009933" quantity="6000.0"/>
+							<sld:ColorMapEntry color="#ff9900" quantity="9000.0"/>
+							<sld:ColorMapEntry color="#ff0000" quantity="14265.0"/>
+						</sld:ColorMap>
+					</sld:RasterSymbolizer>
+				</sld:Rule>
+			</sld:FeatureTypeStyle>
+		</sld:UserStyle>
+	</sld:NamedLayer>
+</sld:StyledLayerDescriptor>

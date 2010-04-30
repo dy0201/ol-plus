@@ -1,0 +1,98 @@
+.olControlPanel {
+	float:left;
+    right: 436px;
+    top: 5px;
+    height: 24px; 
+    width: 150px;    
+}
+
+.olControlPanel .olControlAgsIdentifyTaskItemActive { 
+   position: absolute;
+   left: 0px;
+   background-image: url("img/identify-on.png");
+   background-repeat: no-repeat;
+   width:  32px;
+   height: 32px;
+}
+
+.olControlPanel .olControlAgsIdentifyTaskItemInactive { 
+   position: absolute;
+   left: 0px;
+   background-image: url("img/identify-off.png");
+   background-repeat: no-repeat;
+   width:  24px;
+   height: 24px;
+}
+
+.olControlPanel .olControlAgsGeometryServiceItemActive { 
+   position: absolute;
+   left: 30px;
+   background-image: url("img/buffer-on.png");
+   background-repeat: no-repeat;
+   width:  32px;
+   height: 32px;
+}
+
+.olControlPanel .olControlAgsGeometryServiceItemInactive { 
+   position: absolute;
+   left: 30px;
+   background-image: url("img/buffer-off.png");
+   background-repeat: no-repeat;
+   width:  24px;
+   height: 24px;
+}
+
+.olControlPanel .olControlAgsGeoprocessorItemActive { 
+   position: absolute;
+   left: 60px;
+   background-image: url("img/driving-on.png");
+   background-repeat: no-repeat;
+   width:  32px;
+   height: 32px;
+}
+
+.olControlPanel .olControlAgsGeoprocessorItemInactive { 
+   position: absolute;
+   left: 60px;
+   background-image: url("img/driving-off.png");
+   background-repeat: no-repeat;
+   width:  24px;
+   height: 24px;
+}
+
+.olControlPanel .olControlAgsLocatorItemActive { 
+   position: absolute;
+   left: 90px;
+   background-image: url("img/locator-on.png");
+   background-repeat: no-repeat;
+   width:  32px;
+   height: 32px;
+}
+
+.olControlPanel .olControlAgsLocatorItemInactive { 
+   position: absolute;
+   left: 90px;
+   background-image: url("img/locator-off.png");
+   background-repeat: no-repeat;
+   width:  24px;
+   height: 24px;
+}
+
+.olControlPanel .olControlAgsQueryTaskItemActive { 
+   position: absolute;
+   left: 120px;
+   background-image: url("img/querytask-on.png");
+   background-repeat: no-repeat;
+   width:  32px;
+   height: 32px;
+}
+
+.olControlPanel .olControlAgsQueryTaskItemInactive { 
+   position: absolute;
+   left: 120px;
+   background-image: url("img/querytask-off.png");
+   background-repeat: no-repeat;
+   width:  24px;
+   height: 24px;
+}
+

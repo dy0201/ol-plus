@@ -1,0 +1,83 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>OpenLayers Tiled Map Service Example</title>
+    <link rel="stylesheet" href="../../theme/default/style.css" type="text/css" />
+    <style type="text/css">
+        #map {
+            width: 800px;
+            height: 475px;
+            border: 1px solid black;
+        }
+    </style>
+    
+    <script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+	<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+				 
+	<!-- Google Earth library -->
+	<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA44VqMzKOlUj3kMMbZwNyDRSUwqIfIQ6JFPfFD1ZcfKLPey_q8hQH-euV-MYp4ZdHZgBm9qwNA9FcIA'></script>
+	
+    <script type="text/javascript">
+        function init(){	        	        
+	        
+	        var lon = -122.838493; 
+			var lat = 45.432976;
+			var zoom = 9;
+								
+			var center_mercator = OpenLayers.Layer.SphericalMercator.forwardMercator(lon, lat);
+			center_mercator_x = center_mercator.lon;
+			center_mercator_y = center_mercator.lat;
+	        
+	        var options = 	{
+	            projection: "EPSG:900913",
+		        units: "m",
+		        maxResolution: 156543.039989205,
+		        maxExtent: new OpenLayers.Bounds(-20037508.342789, -20037508.342789, 20037508.342789, 20037508.342789)				
+			};										
+			map = new OpenLayers.Map('map', options);
+			
+			var satellite = new OpenLayers.Layer.Google( 
+				"Google Satellite", 
+				{	
+					type: G_SATELLITE_MAP,
+					'sphericalMercator': true, 
+					'maxZoomLevel':18
+				}
+			);
+		    map.addLayer(satellite);	
+			
+			var agsTiledLayer = new OpenLayers.Layer.AgsTiled( 
+				"AgsTiled Layer (EPSG:900913)", 
+				"http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer/tile/", 
+				{
+					tileSize: new OpenLayers.Size(256,256),
+					tileFormat:'png',
+					tileOrigin: new OpenLayers.LonLat(-20037508.342789, 20037508.342789),
+					tileFullExtent: new OpenLayers.Bounds(-13758743.4295939, 5591455.28887228, -13531302.3472101, 5757360.4178881),
+					isBaseLayer: false,
+					singleTile: false					 					
+				}
+			);            
+            agsTiledLayer.setVisibility(true);
+			agsTiledLayer.setOpacity(0.75);	
+            map.addLayer(agsTiledLayer);
+            
+            var identify_results_layer = new OpenLayers.Layer.Vector(
+				"identify results", 
+				{
+					// displayInLayerSwitcher: false
+				}
+			);
+			map.addLayer(identify_results_layer);                 
+					
+			map.setCenter(new OpenLayers.LonLat(center_mercator_x, center_mercator_y), zoom);			
+			map.addControl(new OpenLayers.Control.LayerSwitcher());	
+			map.addControl(new OpenLayers.Control.PanZoomBar());	
+			OpenLayers.Console.log("...application initialized...");
+			
+		}
+    </script>
+  </head>
+  <body onload="init();">
+    <div id="map" style="width:1024px;height:512px;margin-top:5px;margin-left:5px;background-color:#ffffff"></div>
+  </body>
+</html>

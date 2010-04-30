@@ -1,0 +1,954 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wps:Capabilities service="WPS" version="1.0.0"
+	xml:lang="en-US"
+	xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd"
+	updateSequence="1" xmlns:xlink="http://www.w3.org/1999/xlink"
+	xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<ows:ServiceIdentification>
+		<ows:Title>52N WPS</ows:Title>
+		<ows:Abstract>Service based on the 52north implementation of WPS 1.0.0</ows:Abstract>
+		<ows:Keywords>
+			<ows:Keyword>WPS</ows:Keyword>
+			<ows:Keyword>AAFC</ows:Keyword>
+			<ows:Keyword>geospatial</ows:Keyword>
+			<ows:Keyword>geoprocessing</ows:Keyword>
+		</ows:Keywords>
+		<ows:ServiceType>WPS</ows:ServiceType>
+		<ows:ServiceTypeVersion>1.0.0</ows:ServiceTypeVersion>
+		<ows:ServiceTypeVersion>0.4.0</ows:ServiceTypeVersion>
+		<ows:Fees>NONE</ows:Fees>
+		<ows:AccessConstraints>NONE</ows:AccessConstraints>
+	</ows:ServiceIdentification>
+	<ows:ServiceProvider>
+		<ows:ProviderName>52North</ows:ProviderName>
+		<ows:ProviderSite xlink:href="http://www.52north.org/" />
+		<ows:ServiceContact>
+			<ows:IndividualName>Your name</ows:IndividualName>
+			<ows:PositionName>Your position</ows:PositionName>
+			<ows:ContactInfo>
+				<ows:Phone>
+					<ows:Voice />
+					<ows:Facsimile />
+				</ows:Phone>
+				<ows:Address>
+					<ows:DeliveryPoint />
+					<ows:City />
+					<ows:AdministrativeArea />
+					<ows:PostalCode />
+					<ows:Country />
+					<ows:ElectronicMailAddress />
+				</ows:Address>
+			</ows:ContactInfo>
+		</ows:ServiceContact>
+	</ows:ServiceProvider>
+	<ows:OperationsMetadata>
+		<ows:Operation name="GetCapabilities">
+			<ows:DCP>
+				<ows:HTTP>
+					<ows:Get xlink:href="http://localhost:8080/wps/WebProcessingService" />
+				</ows:HTTP>
+			</ows:DCP>
+		</ows:Operation>
+		<ows:Operation name="DescribeProcess">
+			<ows:DCP>
+				<ows:HTTP>
+					<ows:Get xlink:href="http://localhost:8080/wps/WebProcessingService" />
+
+				</ows:HTTP>
+			</ows:DCP>
+		</ows:Operation>
+		<ows:Operation name="Execute">
+			<ows:DCP>
+				<ows:HTTP>
+					<ows:Get xlink:href="http://localhost:8080/wps/WebProcessingService" />
+					<ows:Post xlink:href="http://localhost:8080/wps/WebProcessingService" />
+				</ows:HTTP>
+			</ows:DCP>
+		</ows:Operation>
+	</ows:OperationsMetadata>
+
+	<wps:ProcessOfferings>
+		<wps:Process wps:processVersion="2">
+			<ows:Identifier>org.n52.wps.server.algorithm.SimpleBufferAlgorithm</ows:Identifier>
+			<ows:Title>Create a buffer around a polygon.</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="2">
+			<ows:Identifier>org.n52.wps.server.algorithm.simplify.DouglasPeuckerAlgorithm</ows:Identifier>
+			<ows:Title>douglasPeucker algorithm</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>visibility</ows:Identifier>
+			<ows:Title>Visibility</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>recttopolar</ows:Identifier>
+			<ows:Title>Rect to polar</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>aggregationindex</ows:Identifier>
+			<ows:Title>Aggregation index</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>crossclassification</ows:Identifier>
+			<ows:Title>Cross checking(Kappa index)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodvariance</ows:Identifier>
+			<ows:Title>Variance (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>clipgrid</ows:Identifier>
+			<ows:Title>Crop grid with polygon layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>createhyetogram</ows:Identifier>
+			<ows:Title>Create synthetic hyetograph</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>randomvector</ows:Identifier>
+			<ows:Title>Create random vector layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>slope</ows:Identifier>
+			<ows:Title>Slope</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>costinroutesanisotropic</ows:Identifier>
+			<ows:Title>Cost in predefined routes (anisotropic)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>convergence</ows:Identifier>
+			<ows:Title>Convergence index</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhooddiversity</ows:Identifier>
+			<ows:Title>Diversity</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodcountlowerthan</ows:Identifier>
+			<ows:Title>Lower values count (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>removeholes</ows:Identifier>
+			<ows:Title>Remove holes</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>delaunay</ows:Identifier>
+			<ows:Title>Delaunay triangulation</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>acccostcombined</ows:Identifier>
+			<ows:Title>Accumulated cost (combined)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>solarradiation</ows:Identifier>
+			<ows:Title>Solar radiation</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>aspect</ows:Identifier>
+			<ows:Title>Aspect</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>vectorizelines</ows:Identifier>
+			<ows:Title>Vectorize raster layer (lines)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>los</ows:Identifier>
+			<ows:Title>Line of sight</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>histogram</ows:Identifier>
+			<ows:Title>Histogram</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>calibrateregression</ows:Identifier>
+			<ows:Title>Calibrate an image (regression)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>disttochannelnetwork</ows:Identifier>
+			<ows:Title>Distance to channel network</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridcountgreaterthan</ows:Identifier>
+			<ows:Title>Larger values count</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>spatialcorrelation</ows:Identifier>
+			<ows:Title>Spatial autocorrelation</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>ripleysk</ows:Identifier>
+			<ows:Title>Ripley's K</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>transform</ows:Identifier>
+			<ows:Title>Transform</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>costinroutes</ows:Identifier>
+			<ows:Title>Cost in predefined routes</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>vectorfieldcorrelation</ows:Identifier>
+			<ows:Title>Correlation between fields</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>pdfnormal</ows:Identifier>
+			<ows:Title>Normal probability distribution</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridmajority</ows:Identifier>
+			<ows:Title>Mayority</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>quadrat</ows:Identifier>
+			<ows:Title>Quadrant analysis</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>fresnellos</ows:Identifier>
+			<ows:Title>RF Line of sight</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>vectormean</ows:Identifier>
+			<ows:Title>Directional mean</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>ahp</ows:Identifier>
+			<ows:Title>Analytical Hierarchy Process (AHP)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>vectorfieldcalculator</ows:Identifier>
+			<ows:Title>Field calculator</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>intersection</ows:Identifier>
+			<ows:Title>Intersection</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodcountequalto</ows:Identifier>
+			<ows:Title>Equal values count (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>watershedsbysize</ows:Identifier>
+			<ows:Title>Watersheds by area</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>upslopeareafromarea</ows:Identifier>
+			<ows:Title>Upslope area from outlet zone</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodcountgreaterthan</ows:Identifier>
+			<ows:Title>Larger values count (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>rastertopoints</ows:Identifier>
+			<ows:Title>Raster layer to points layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodminority</ows:Identifier>
+			<ows:Title>Minority (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>generateterrain</ows:Identifier>
+			<ows:Title>Random DEM</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>his2rgb</ows:Identifier>
+			<ows:Title>HIS -&gt; RGB</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>volume</ows:Identifier>
+			<ows:Title>Volume calculation</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>geometricpropertieslines</ows:Identifier>
+			<ows:Title>Geometric properties of lines</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>splitlineswithpoints</ows:Identifier>
+			<ows:Title>Split lines with points layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>channelnetwork</ows:Identifier>
+			<ows:Title>Channel network</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>fitnpointsinpolygon</ows:Identifier>
+			<ows:Title>Adjust n point to polygon</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>ndvi</ows:Identifier>
+			<ows:Title>NDVI</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>isocrones</ows:Identifier>
+			<ows:Title>Time to outlet</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>hypsometry</ows:Identifier>
+			<ows:Title>Hypsometry</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>cleanpointslayer</ows:Identifier>
+			<ows:Title>Clean points layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>normalitytest</ows:Identifier>
+			<ows:Title>Normality test</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>mediancenter</ows:Identifier>
+			<ows:Title>Median center</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>calibrate</ows:Identifier>
+			<ows:Title>Calibrate an image</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>equalize</ows:Identifier>
+			<ows:Title>Equalize</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>reclassifydisjoint</ows:Identifier>
+			<ows:Title>Reclassify in disjoint classes</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>realarea</ows:Identifier>
+			<ows:Title>Real area</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>changelinedirection</ows:Identifier>
+			<ows:Title>Change line direction</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>cfactorfromndvi</ows:Identifier>
+			<ows:Title>C factor from NDVI</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>centroids</ows:Identifier>
+			<ows:Title>Centroids</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>polygonstatisticsfrompoints</ows:Identifier>
+			<ows:Title>Point statistics in polygons</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>generateroutes</ows:Identifier>
+			<ows:Title>Generate alternative routes</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>strahlerorder</ows:Identifier>
+			<ows:Title>Strahler Order</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>difference</ows:Identifier>
+			<ows:Title>Difference</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridminority</ows:Identifier>
+			<ows:Title>Minority</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>gridcalculator</ows:Identifier>
+			<ows:Title>Raster calculator</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>simplifylines</ows:Identifier>
+			<ows:Title>Simplify lines</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>nrvi</ows:Identifier>
+			<ows:Title>NRVI</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>fragstatsdiversity</ows:Identifier>
+			<ows:Title>Fragstats (diversity metrics)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>changedatatype</ows:Identifier>
+			<ows:Title>Change data type</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>thinning</ows:Identifier>
+			<ows:Title>Thinning</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>density</ows:Identifier>
+			<ows:Title>Density</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>reclassifyconsecutive</ows:Identifier>
+			<ows:Title>Reclassify in ordered classes</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>leastcostpath</ows:Identifier>
+			<ows:Title>Least cost path</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>distancematrix</ows:Identifier>
+			<ows:Title>Distance matrix</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>croptovaliddata</ows:Identifier>
+			<ows:Title>Crop to valid data cells</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridkurtosis</ows:Identifier>
+			<ows:Title>Kurtosis</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>normalize</ows:Identifier>
+			<ows:Title>Normalize</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>tablebasicstats</ows:Identifier>
+			<ows:Title>Basic statistics</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>acccost</ows:Identifier>
+			<ows:Title>Accumulated cost(isotropic)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>splitmultipart</ows:Identifier>
+			<ows:Title>Separate multi-part features</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>upslopeareafrompoint</ows:Identifier>
+			<ows:Title>Uslope area from a single point</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>profile</ows:Identifier>
+			<ows:Title>Profile</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>classstatistics</ows:Identifier>
+			<ows:Title>Class statistics</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>thresholdbuffer</ows:Identifier>
+			<ows:Title>Threshold buffer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>clip</ows:Identifier>
+			<ows:Title>Clip</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>idw</ows:Identifier>
+			<ows:Title>Inverse Distance Weighting (IDW)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>mergegrids</ows:Identifier>
+			<ows:Title>Merge grids</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>crosssections</ows:Identifier>
+			<ows:Title>Cross sections</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>edgecontamination</ows:Identifier>
+			<ows:Title>Edge contamination</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridmedian</ows:Identifier>
+			<ows:Title>Median</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>flowlineprofile</ows:Identifier>
+			<ows:Title>Flow line profile</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>gridorientation</ows:Identifier>
+			<ows:Title>Mirror/flip</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>curvatures</ows:Identifier>
+			<ows:Title>Curvatures</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>rasterizevectorlayer</ows:Identifier>
+			<ows:Title>Rasterize vector layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>symdifference</ows:Identifier>
+			<ows:Title>Symmetric difference</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridvariance</ows:Identifier>
+			<ows:Title>Variance</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>gridfromfunction</ows:Identifier>
+			<ows:Title>Grid from function</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>gradientlines</ows:Identifier>
+			<ows:Title>Gradient lines</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>perturbatepointslayer</ows:Identifier>
+			<ows:Title>Perturbate points layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridskewness</ows:Identifier>
+			<ows:Title>Skewness</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>contourlines</ows:Identifier>
+			<ows:Title>Contour lines</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodmeanvalue</ows:Identifier>
+			<ows:Title>Mean (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>volumebetweengrids</ows:Identifier>
+			<ows:Title>Volumen between two layers</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>aggregate</ows:Identifier>
+			<ows:Title>Aggregate</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodrange</ows:Identifier>
+			<ows:Title>Range (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>pdfchisquared</ows:Identifier>
+			<ows:Title>Chi squared probability distribution</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>regression</ows:Identifier>
+			<ows:Title>Regression</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhooddominance</ows:Identifier>
+			<ows:Title>Dominance</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>guh</ows:Identifier>
+			<ows:Title>Geomorphological instantaneous Unit Hydrograph</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>horizonblockage</ows:Identifier>
+			<ows:Title>Horizon blockage</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>linestoequispacedpoints</ows:Identifier>
+			<ows:Title>Lines to equispaced points</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>maxvalueuphill</ows:Identifier>
+			<ows:Title>Max. value uphill</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodfragmentation</ows:Identifier>
+			<ows:Title>Fragmentation</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>slopelength</ows:Identifier>
+			<ows:Title>Slope length</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodmajority</ows:Identifier>
+			<ows:Title>Mayority (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>reclassifyequalarea</ows:Identifier>
+			<ows:Title>Divide in n classes of equal area</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>constantgrid</ows:Identifier>
+			<ows:Title>Constant grid</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>meancenter</ows:Identifier>
+			<ows:Title>Mean center and standard distance</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>minimumenclosingpolygon</ows:Identifier>
+			<ows:Title>Minimum enclosing shapes</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>roc</ows:Identifier>
+			<ows:Title>ROC curve</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>hillshade</ows:Identifier>
+			<ows:Title>Shaded relief</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>topographicindices</ows:Identifier>
+			<ows:Title>Topographic indices</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>elevationreliefindex</ows:Identifier>
+			<ows:Title>Elevation-relief ratio</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>contraststretching</ows:Identifier>
+			<ows:Title>Contrast stretching</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>vectorspatialcluster</ows:Identifier>
+			<ows:Title>Spatial cluster</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>merge</ows:Identifier>
+			<ows:Title>Merge</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>pvirichardson</ows:Identifier>
+			<ows:Title>PVI(Richardson and Wiegand)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>ttvi</ows:Identifier>
+			<ows:Title>TTVI</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>generaterandomnormal</ows:Identifier>
+			<ows:Title>Random grid (normal)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>fragstatsarea</ows:Identifier>
+			<ows:Title>Fragstats (area/density/edge metrics)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>predictivemodels</ows:Identifier>
+			<ows:Title>Predictive models</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>union</ows:Identifier>
+			<ows:Title>Union</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridcountlowerthan</ows:Identifier>
+			<ows:Title>Lower values count</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>heightoverchannelnetwork</ows:Identifier>
+			<ows:Title>Elevation over channel network</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>meanvalueuphill</ows:Identifier>
+			<ows:Title>Mean value uphill</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>snappoints</ows:Identifier>
+			<ows:Title>Snap points to layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>gridcompletion</ows:Identifier>
+			<ows:Title>Complete grid</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridmaxvaluegrid</ows:Identifier>
+			<ows:Title>Maximum value layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>surfacespecificpoints</ows:Identifier>
+			<ows:Title>Landform classification</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodminvalue</ows:Identifier>
+			<ows:Title>Minimum (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>graticulebuilder</ows:Identifier>
+			<ows:Title>Create graticule</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>sortraster</ows:Identifier>
+			<ows:Title>Sort</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>visualexposure</ows:Identifier>
+			<ows:Title>Visual exposure</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridminvalue</ows:Identifier>
+			<ows:Title>Minimum</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>countpoints</ows:Identifier>
+			<ows:Title>Count points in polygons</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>generaterandomuniform</ows:Identifier>
+			<ows:Title>Random grid (uniform)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>cva</ows:Identifier>
+			<ows:Title>Change Vector Analysis</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodvarianceradius</ows:Identifier>
+			<ows:Title>Radius of variance</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>erosiondilation</ows:Identifier>
+			<ows:Title>Erosion/Dilation</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>gridbasicstats</ows:Identifier>
+			<ows:Title>Basic statistics</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>nnanalysis</ows:Identifier>
+			<ows:Title>Nearest neighbour analysis</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>protectionindex</ows:Identifier>
+			<ows:Title>Protection index</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>exportvector</ows:Identifier>
+			<ows:Title>Export vector layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>gridsfromtableandgrid</ows:Identifier>
+			<ows:Title>Grids from table and classified grid</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>watersheds</ows:Identifier>
+			<ows:Title>Watersheds</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>ctvi</ows:Identifier>
+			<ows:Title>CTVI</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>cellbalance</ows:Identifier>
+			<ows:Title>Net balance</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>buffer</ows:Identifier>
+			<ows:Title>Buffer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>polylinestopolygons</ows:Identifier>
+			<ows:Title>Polylines to polygons</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>pdfstudent</ows:Identifier>
+			<ows:Title>Student's t probability distribution</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>universalkriging</ows:Identifier>
+			<ows:Title>Universal Kriging</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>polartorect</ows:Identifier>
+			<ows:Title>Polar to rect</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>tvi</ows:Identifier>
+			<ows:Title>TVI</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>pdfbinomial</ows:Identifier>
+			<ows:Title>Bernouilli probability distribution</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>tablefieldcorrelation</ows:Identifier>
+			<ows:Title>Correlation between fields</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>lineardecrease</ows:Identifier>
+			<ows:Title>Linear decrease</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multipleregression</ows:Identifier>
+			<ows:Title>Multiple regression</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>pdfexponential</ows:Identifier>
+			<ows:Title>Exponential probability distribution</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodnumberofclasses</ows:Identifier>
+			<ows:Title>Number of different classes</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>generaterandombernoulli</ows:Identifier>
+			<ows:Title>Random grid (Bernouilli)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>correlation</ows:Identifier>
+			<ows:Title>Correlation between layers</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>geometricproperties</ows:Identifier>
+			<ows:Title>Geometric properties of polygons</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>gridstatisticsinpolygons</ows:Identifier>
+			<ows:Title>Grid statistics in polygons</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>polylinestosinglesegments</ows:Identifier>
+			<ows:Title>Polylines to single segments</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>accflow</ows:Identifier>
+			<ows:Title>Flow accumulation</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridmeanvalue</ows:Identifier>
+			<ows:Title>Mean</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>polygonstopolylines</ows:Identifier>
+			<ows:Title>Polygons to polylines</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridmaxvalue</ows:Identifier>
+			<ows:Title>Maximum</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodskewness</ows:Identifier>
+			<ows:Title>Skeweness (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridrange</ows:Identifier>
+			<ows:Title>Range</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>dissolve</ows:Identifier>
+			<ows:Title>Dissolve</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>semivariances</ows:Identifier>
+			<ows:Title>Semivariances (raster)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>filterclumps</ows:Identifier>
+			<ows:Title>Filter clumps</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridcountequalto</ows:Identifier>
+			<ows:Title>Equal values count</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>reclassifyequalamplitude</ows:Identifier>
+			<ows:Title>Divide in n classes of equal amplitude</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>kriging</ows:Identifier>
+			<ows:Title>Kriging</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>pviwalther</ows:Identifier>
+			<ows:Title>PVI(Walther and Shabaani)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodmaxvalue</ows:Identifier>
+			<ows:Title>Maximum (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>multigridminvaluegrid</ows:Identifier>
+			<ows:Title>Minimum value layer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodmedian</ows:Identifier>
+			<ows:Title>Median (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>rasterbuffer</ows:Identifier>
+			<ows:Title>Buffer</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>covariancematrix</ows:Identifier>
+			<ows:Title>Covariance matrix</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>vectorbasicstats</ows:Identifier>
+			<ows:Title>Basic statistics</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>invertnodata</ows:Identifier>
+			<ows:Title>Invert mask</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>sumofcostfromallpoints</ows:Identifier>
+			<ows:Title>Sum of cost to all points</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>neighborhoodkurtosis</ows:Identifier>
+			<ows:Title>Kurtosis (neighbourhood)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>closegapsnn</ows:Identifier>
+			<ows:Title>Void filling [nearest neighbour]</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>fuzzify</ows:Identifier>
+			<ows:Title>Fuzzify</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>addeventtheme</ows:Identifier>
+			<ows:Title>Points layer from table</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>acccostanisotropic</ows:Identifier>
+			<ows:Title>Accumulated cost (anisotropic)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>pviqi</ows:Identifier>
+			<ows:Title>PVI(Qi et al)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>vectorcluster</ows:Identifier>
+			<ows:Title>Cluster</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>vectorize</ows:Identifier>
+			<ows:Title>Vectorize raster layer (polygons)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>pviperry</ows:Identifier>
+			<ows:Title>PVI(Perry and Lautenschlager)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>closegaps</ows:Identifier>
+			<ows:Title>Void filling</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>vectorhistogram</ows:Identifier>
+			<ows:Title>Histogram</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>usped</ows:Identifier>
+			<ows:Title>USPED</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>fillsinks</ows:Identifier>
+			<ows:Title>Sink filling</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>acv</ows:Identifier>
+			<ows:Title>Anisotropic coefficient of variation</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>locateallocate</ows:Identifier>
+			<ows:Title>Location/allocation</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>kerneldensity</ows:Identifier>
+			<ows:Title>Density (kernel)</ows:Title>
+		</wps:Process>
+		<wps:Process wps:processVersion="1.0.0">
+			<ows:Identifier>rgb2his</ows:Identifier>
+			<ows:Title>RGB -&gt; HIS</ows:Title>
+		</wps:Process>
+	</wps:ProcessOfferings>
+	<wps:Languages>
+		<wps:Default>
+			<ows:Language>en-US</ows:Language>
+		</wps:Default>
+		<wps:Supported>
+			<ows:Language>en-US</ows:Language>
+		</wps:Supported>
+	</wps:Languages>
+
+</wps:Capabilities>

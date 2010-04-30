@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>AgsImageService Layer Sample</title>
+
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+				  
+		<script type="text/javascript"">
+			var map;
+			
+			function init() {
+				var lon = -80.95;
+				var lat = 28.50;
+			    var zoom = 9;
+			    
+			    var options = 	{
+					controls: [
+			    		new OpenLayers.Control.LayerSwitcher2(),
+			    		new OpenLayers.Control.Navigation(),
+			    		new OpenLayers.Control.PanZoom2(),
+			    		new OpenLayers.Control.MousePosition()
+			    	],
+			        projection: "EPSG:4326",		        		        	
+					maxResolution: 0.3515625,		        	        
+			        maxExtent: new OpenLayers.Bounds(-180, -90, 180, 90)
+				};
+				
+				map = new OpenLayers.Map('map', options);
+				
+				var agsTiledLayer = new OpenLayers.Layer.AgsTiled( 
+					"I3_Imagery_Prime_World (EPSG:4326)", 
+					"http://server.arcgisonline.com/ArcGIS/rest/services/NGS_Topo_US_2D/MapServer/tile/", 
+					{					
+						tileSize: new OpenLayers.Size(512, 512),
+						tileFormat:'jpg',
+						tileOrigin: new OpenLayers.LonLat(-180, 90),
+						tileFullExtent: new OpenLayers.Bounds(-180, -90, 180, 90),
+						isBaseLayer: true,
+						singleTile: false					 					
+					}
+				);  
+				map.addLayer(agsTiledLayer);
+
+				var ags_map_service = new OpenLayers.Layer.AgsDynamic(   
+						"Iran", 
+						"http://sazabi/ArcGIS/rest/services/iran/ImageServer/exportImage?", 										
+						{ 																																				
+							IMAGESR: '4326',
+							BBOXSR: '4326',																																																									
+							FORMAT: 'png'																
+						},
+						{														
+							isBaseLayer: false,
+							singleTile: true												
+						}
+					);												 
+				ags_map_service.setVisibility(false);
+				ags_map_service.setOpacity(0.75);						
+				map.addLayer(ags_map_service);	
+
+				map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);		
+			}			
+		</script>		
+	</head>
+    <body onload="init();">
+		 <div id="map" style="width:1024px;height:512px;margin-top:5px;margin-left:5px;background-color:#ffffff">
+		</div>
+    </body>
+</html>

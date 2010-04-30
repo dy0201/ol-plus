@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<!--<!DOCTYPE metadata SYSTEM "http://www.esri.com/metadata/esriprof80.dtd">-->
+<metadata xml:lang="en"><Esri><MetaID>{9DA39647-91BF-4018-A538-A0251348271A}</MetaID><CreaDate>20090603</CreaDate><CreaTime>09354100</CreaTime><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="C:\Program Files\ArcGIS\ArcToolbox\Toolboxes\Data Management Tools.tbx\CalculateStatistics" Date="20090603" Time="093541">CalculateStatistics F:\temp\hillshaded.tif 1 1 # F:\temp\hillshaded.tif</Process></lineage></DataProperties></Esri></metadata>

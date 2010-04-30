@@ -1,0 +1,15 @@
+.previous {
+    background-image: url(../images/previous_frame.gif) !important;
+}
+.next {
+    background-image: url(../images/next_frame.gif) !important;
+}
+.play {
+    background-image: url(../images/play.gif) !important;
+}
+.pause {
+    background-image: url(../images/pause.gif) !important;
+}
+.stop {
+    background-image: url(../images/stop.gif) !important;
+}

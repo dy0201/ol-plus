@@ -1,0 +1,24 @@
+{
+	"identifier": "org.n52.wps.server.algorithm.SimpleBufferAlgorithm",
+	"datainputs": [
+		{
+			"identifier": "data",
+			"reference": {
+				"href": "http://10.49.52.177/arcgis/services/sanfrancisco/MapServer/WFSServer?version=1.0.0%26request=GetFeature%26typename=highways%26featureid=highways.F3__1",
+				"schema": "http://schemas.opengis.net/gml/2.1.2/feature.xsd",
+				"encoding": "text/xml"
+			}
+		},
+		{
+			"identifier": "width",
+			"literalData": 0.005
+		}
+	],
+	"resultoutputs": {
+		"rawdataoutput": {
+			"identifier": "result",
+			"schema": "http://schemas.opengis.net/gml/2.1.2/feature.xsd",
+			"mimetype": "text/xml"
+		}
+	}
+}

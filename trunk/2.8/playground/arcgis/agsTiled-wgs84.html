@@ -1,0 +1,89 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>OpenLayers Tiled Map Service Example</title>
+    <link rel="stylesheet" href="../../theme/default/style.css" type="text/css" />
+    <style type="text/css">
+        #map {
+            width: 800px;
+            height: 475px;
+            border: 1px solid black;
+        }
+    </style>
+    
+    <script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+	<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+				 	
+    <script type="text/javascript">
+        function init(){
+	        
+	        var lon = -122.838493; 
+			var lat = 45.432976;
+	        var zoom = 5;
+	        
+	        var options = 	{
+	            projection: "EPSG:4326",		        		        	
+				maxResolution: 0.3515625,		        	        
+		        maxExtent: new OpenLayers.Bounds(-180, -90, 180, 90)
+			};
+			
+			map = new OpenLayers.Map('map', options);
+			
+			var agsTiledLayer = new OpenLayers.Layer.AgsTiled( 
+				"AgsTiled Layer (EPSG:4326)", 
+				"http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_Imagery_World_2D/MapServer/tile/", 
+				{					
+					tileSize: new OpenLayers.Size(512, 512),
+					tileFormat:'jpg',
+					tileOrigin: new OpenLayers.LonLat(-180, 90),
+					tileFullExtent: new OpenLayers.Bounds(-180, -90, 180, 90),
+					isBaseLayer: true,
+					singleTile: false					 					
+				}
+			);  
+			map.addLayer(agsTiledLayer);
+			
+			var agsTiledLayer2 = new OpenLayers.Layer.AgsTiled( 
+				"AgsTiled Layer2 (EPSG:4326)", 
+				"http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer/tile/", 
+				{					
+					tileSize: new OpenLayers.Size(512, 512),
+					tileFormat:'png',
+					tileOrigin: new OpenLayers.LonLat(-180, 90),
+					tileFullExtent: new OpenLayers.Bounds(-123.596895130833, 44.8091202495904, -121.553757125412, 45.8567792045506), 	
+					isBaseLayer: false,
+					singleTile: false					 					
+				}
+			);  
+			agsTiledLayer2.setVisibility(false);
+			agsTiledLayer2.setOpacity(0.75);
+			map.addLayer(agsTiledLayer2);
+			
+			var agsDaynamicLayer = new OpenLayers.Layer.AgsDynamic(   
+				"AgsDynamic Layer (EPSG:4326)", 
+				"http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Population_World/MapServer/Export?", 										
+				{ 											
+					LAYERS: 'show:0',																			
+					IMAGESR: '4326',
+					BBOXSR: '4326',																																																									
+					FORMAT: 'png',											
+					TRANSPARENT: true
+				},
+				{														
+					isBaseLayer: false,
+					singleTile: true												
+				}
+			);												 
+			agsDaynamicLayer.setVisibility(false);
+			agsDaynamicLayer.setOpacity(0.5);						
+			map.addLayer(agsDaynamicLayer);
+			
+			map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);			
+			map.addControl(new OpenLayers.Control.LayerSwitcher());		
+			map.addControl(new OpenLayers.Control.PanZoomBar());        	     
+		}
+    </script>
+  </head>
+  <body onload="init();">
+    <div id="map" style="width:1024px;height:512px;margin-top:5px;margin-left:5px;background-color:#ffffff"></div>
+  </body>
+</html>
