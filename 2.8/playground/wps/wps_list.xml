@@ -1,0 +1,12 @@
+<wps_services>
+	<wps_service>
+		http://52north.org:8080/wps/WebProcessingService
+	</wps_service>	
+	<wps_service>
+		http://geoserver.itc.nl:8080/wps/WebProcessingService
+	</wps_service>	
+	<wps_service>
+		http://sazabi:9191/52n-wps-webapp-2.0-rc2/WebProcessingService?Request=GetCapabilities&Service=WPS
+	</wps_service>
+	
+</wps_services>

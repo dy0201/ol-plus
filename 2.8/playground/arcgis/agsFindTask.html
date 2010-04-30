@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>AgsFindTask Control Sample</title>
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../lib/OpenLayers.js"></script>				
+		<!-- ArcGIS Server JavaScript library -->
+		<script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=1.3"></script>							 
+		<script type="text/javascript" src="agsFindTask.js"></script>			
+	</head>
+    <body onload="init();">    	
+		<p>
+			Click "Find" buton to find all cities with name like "San "; 
+			<br>Click "Clean up" button to clean up the find results; 
+			<br>See Firebug console for full list of found cities
+		</p>
+		<div id="map" style="width:1024px;height:512px;margin-top:5px;margin-left:5px;background-color:#ffffff"></div>
+		<input id="find_btn" type="button" value="Find" onclick="find();"/>
+		<input id="clean_btn" type="button" value="Clean up" onclick="cleanup();"/>					
+	</body>
+</html>

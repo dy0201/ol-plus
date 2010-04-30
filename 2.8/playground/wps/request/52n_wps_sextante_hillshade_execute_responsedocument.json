@@ -1,0 +1,44 @@
+{
+	"identifier": "hillshade",
+	"datainputs": [
+		{
+			"identifier": "DEM",
+			"reference": {
+				"href": "data/sthelens.tif",					
+				"href2": "http://10.49.52.177/arcgis/services/sthelens/GeoDataServer/WCSServer?REQUEST=GetCoverage%26SERVICE=WCS%26VERSION=1.0.0%26COVERAGE=2%26CRS=EPSG:4326%26BBOX=-122.258533035958,46.1239773659017,-122.11629660168,46.250689469594%26WIDTH=1017%26HEIGHT=906%26FORMAT=GeoTIFF",
+				"mimeType": "image/tiff"
+			}
+		},
+		{
+			"identifier": "METHOD",
+			"literalData": "Standard"
+		},
+		{
+			"identifier": "DECLINATION",
+			"literalData": 45.0
+		},
+		{
+			"identifier": "AZIMUTH",
+			"literalData": 315.0
+		},
+		{
+			"identifier": "EXAGGERATION",
+			"literalData": 1.0
+		}
+	],
+	"resultoutputs": {
+		"rawdataoutput": {
+			"identifier": "SHADED",				
+			"mimetype": "image/tiff"
+		},
+		"responsedocument": {
+			"storeExecuteResponse": "true",
+			"outputs": [
+				{
+					"identifier": "RESULTS",
+					"asReference": "true"	
+				}
+			]
+		}
+	}		
+}

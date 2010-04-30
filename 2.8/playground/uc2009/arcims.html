@@ -1,0 +1,67 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>ArcIMS Example</title>      
+        <link rel="stylesheet" href="../style.css" type="text/css" />
+
+		<!-- local OpenLayers library -->
+		<!--
+		<script type="text/javascript" src="../../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../../lib/OpenLayers.js"></script>
+		-->
+		
+		<!-- OpenLayers library hosted on http://august-openlayers.appspot.com/ -->
+		<script type="text/javascript" src="http://august-openlayers.appspot.com/openlayers/2.8+/OpenLayers.js"></script>
+
+        <script type="text/javascript">
+            
+    		var lon = -122.391667;
+			var lat = 37.760628;
+    		var zoom = 10;
+            var map; 
+			var ims_layer;
+            
+            function init(){
+            	
+                OpenLayers.ProxyHost = "/openlayers-2.8/ApacheProxyServlet?targetUrl=";
+                				
+				var map_options = {
+					//panMethod: null, // set 'panMethod' to null to disable animated panning
+					controls: [
+			       		new OpenLayers.Control.LayerSwitcher2(),
+			       		new OpenLayers.Control.Navigation(),
+			       		new OpenLayers.Control.PanZoom2(),
+			       		new OpenLayers.Control.MousePosition()
+			       	],
+			        projection: "EPSG:4326",		        		        	
+			   		maxResolution: 0.3515625,		        	        
+			        maxExtent: new OpenLayers.Bounds(-180, -90, 180, 90),	
+				};				
+                map = new OpenLayers.Map('map', map_options);
+				                
+                var layer_options = {
+                    serviceName: "SanFrancisco",
+                    async: true,
+					singleTile: false,
+					isBaseLayer: true,
+					buffer: 0,							
+                };
+                
+                ims_layer = new OpenLayers.Layer.ArcIMS(
+					"ArcIMS Sample Map", 
+					"http://monkton/servlet/com.esri.esrimap.Esrimap", 
+					layer_options
+				);                			
+				map.addLayer(ims_layer);                
+                map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);               
+            }
+        </script>
+    </head>
+    <body onload="init();">
+        <div id="map" class="map_medium">
+        </div>
+    </body>
+</html>
+
+
+
+

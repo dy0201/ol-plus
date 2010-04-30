@@ -1,0 +1,7 @@
+<GetCoverage>
+	http://zeon/arcgis/services/elevation/MapServer/WCSServer?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCoverage&COVERAGE=1&FORMAT=GeoTIFF&BBOX=471105.082572495,231307.353396819,471135.082572495,231337.353396819&WIDTH=2&HEIGHT=2&CRS=EPSG:32145&INTERPOLATION=nearest%20neighbor
+</GetCoverage>
+
+<DescribeCoverage>
+	http://zeon/arcgis/services/elevation/MapServer/WCSServer?SERVICE=WCS&REQUEST=DescribeCoverage&VERSION=1.0.0&COVERAGE=1
+</DescribeCoverage>

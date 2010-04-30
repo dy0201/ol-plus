@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wps:Execute 
+	xmlns:wps="http://www.opengis.net/wps/1.0.0" service="WPS" version="1.0.0" 
+	xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+	<ows:Identifier xmlns:ows="http://www.opengis.net/ows/1.1">org.n52.wps.ags.spatialanalyst.surface.hillshade</ows:Identifier>
+	<wps:DataInputs>
+		<wps:Input>
+			<ows:Identifier xmlns:ows="http://www.opengis.net/ows/1.1">in_raster</ows:Identifier>
+			<wps:Reference xlink:href="http://4682_OGC_AGS_0:8399/arcgis/services/spearfish/ImageServer/WCSServer?SERVICE=WCS%26VERSION=1.0.0%26REQUEST=GetCoverage%26COVERAGE=1%26FORMAT=GeoTIFF%26BBOX=-103.870196759883,44.3729887040589,-103.628739923686,44.5016576489851%26WIDTH=745%26HEIGHT=397%26CRS=EPSG:4326%26INTERPOLATION=nearest%20neighbor%26Band=1,2,3"/>
+		</wps:Input>
+	</wps:DataInputs>
+	<wps:ResponseForm>
+		<wps:ResponseDocument storeExecuteResponse="true">
+			<wps:Output asReference="true">
+				<ows:Identifier xmlns:ows="http://www.opengis.net/ows/1.1">out_raster</ows:Identifier>
+			</wps:Output>
+		</wps:ResponseDocument>
+	</wps:ResponseForm>
+</wps:Execute>

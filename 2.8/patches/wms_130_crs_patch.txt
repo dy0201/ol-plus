@@ -1,0 +1,6 @@
+Required patches before this patch:
+
+	wms_patch.patch
+
+Fixing the problem in WMS layer: when consuming 1.3.0 WMS, SRS is sent out instead of CRS.
+

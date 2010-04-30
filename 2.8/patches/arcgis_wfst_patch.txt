@@ -1,0 +1,5 @@
+Add sample 'wfs2-protocol' (wfs2-protocol.html and wfs2-protocol.js)
+Add control 'ModifyFeature2';
+Add format 'WFST2';
+Add protocol 'WFS2';
+Add strategy 'Lock' and 'Save2'.

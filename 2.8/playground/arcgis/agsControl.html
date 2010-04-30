@@ -1,0 +1,26 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>agsControl</title>
+        <link rel="stylesheet" href="../../theme/default/style.css" type="text/css"/>       
+        
+        <script src="../../lib/Firebug/firebug.js"></script>
+        <script src="../../lib/OpenLayers.js"></script>
+		
+		<!-- ArcGIS Server JavaScript library -->
+		<script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=1.2"></script>		
+		
+		<script type="text/javascript">			
+			esriConfig.defaults.io.proxyUrl = "../../lib/OpenLayers/Util/ags-proxy.jsp";
+        	esriConfig.defaults.io.alwaysUseProxy = false;        				           	 
+		</script>
+		
+        <script src="agsControl.js"></script>
+    </head>
+    <body onload="init();">        
+        <div id="map" style="width: 1024px; height: 512px; margin-top: 5px; margin-left: 5px; background-color: #ffffff"></div>
+    	<!--
+		<input id="switch1_btn" type="button" value="toggle mode" onclick="toggleAgsControlMode();"/>
+		<input id="test_btn" type="button" value="test" onclick="test();"/>
+		-->
+	</body>
+</html>
