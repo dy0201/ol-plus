@@ -251,10 +251,14 @@ OpenLayers.Layer.WMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
     getFullRequestString:function(newParams, altUrl) {
         var projectionCode = this.map.getProjection();
         var value = (projectionCode == "none") ? null : projectionCode
-        if (parseFloat(this.params.VERSION) >= 1.3) {
-            this.params.CRS = value;
+        if (parseFloat(this.params.VERSION) >= 1.3) {        	
+			this.params.CRS = this.params.CRS || value;
+			this.params.SRS = null;
+			//this.params.CRS = value;
         } else {
-            this.params.SRS = value;
+        	this.params.SRS = this.params.SRS || value;
+        	this.params.CRS = null;
+            //this.params.SRS = value;
         }
 
         return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(
