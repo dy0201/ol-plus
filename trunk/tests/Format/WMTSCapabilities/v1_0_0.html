@@ -36,7 +36,7 @@
 		}
     
     	function test_layers(t) {
-	        t.plan(20);
+	        t.plan(21);
 	        var xml = document.getElementById("ogcsample").firstChild.nodeValue;
 	        var doc = new OpenLayers.Format.XML().read(xml);
 	
@@ -69,11 +69,13 @@
 			t.eq(layer.tileMatrixSetLinks.length, 1, "...correct count of tileMatrixSetLinks...");
 			t.eq(layer.tileMatrixSetLinks[0].tileMatrixSet, "BigWorld", "...tileMatrixSet is correct...");
 
-			var wgs84Bbox = layer.wgs84BoundingBox;
-			t.ok(wgs84Bbox.lowerCorner instanceof OpenLayers.LonLat, "...wgs84BoudingBox lower corner instance of LonLat...");
-			t.ok(wgs84Bbox.upperCorner instanceof OpenLayers.LonLat, "...wgs84BoudingBox upper corner instance of LonLat...");
-			t.ok((wgs84Bbox.lowerCorner.lon==-180&&wgs84Bbox.lowerCorner.lat==-90), "...wgs84BoudingBox lower corner is correct...");
-			t.ok((wgs84Bbox.upperCorner.lon==180&&wgs84Bbox.upperCorner.lat==90), "...wgs84BoudingBox upper corner is correct...");
+			var wgs84Bbox = layer.bounds;
+			t.ok(wgs84Bbox instanceof OpenLayers.Bounds, "...wgs84BoudingBox instance of OpenLayers.Bounds...");
+			t.eq(wgs84Bbox.left, -180.0, "...wgs84BoudingBox left is correct...");
+			t.eq(wgs84Bbox.right, 180.0, "...wgs84BoudingBox right is correct...");
+			t.eq(wgs84Bbox.bottom, -90.0, "...wgs84BoudingBox bottom is correct...");
+			t.eq(wgs84Bbox.top, 90.0, "...wgs84BoudingBox top is correct...");
+			
 	    }
 
     	function test_tileMatrixSets(t) {
