@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>OpenLayers WMTS Example</title>
+		<link rel="stylesheet" href="../theme/default/style.css" type="text/css"/>
+		<link rel="stylesheet" href="style.css" type="text/css" />
+		<script type="text/javascript" src="../lib/Firebug/firebug.js"></script>
+		<script type="text/javascript" src="../lib/OpenLayers.js"></script>
+
+		<script type="text/javascript">
+			var map = null;
+
+			function init() {	        				
+				OpenLayers.ProxyHost= "/openlayers-trunk/ApacheProxyServlet?resourceUrl=";			
+				var lon = -97.0;
+				var lat = 38.0;
+			    var zoom = 1;
+			    
+			    var options = {
+					controls: [    		
+					    new OpenLayers.Control.LayerSwitcher(),
+			    		new OpenLayers.Control.Navigation(),   
+			    		new OpenLayers.Control.PanZoom()
+			    	],
+			        projection: "EPSG:4326",		        		        	
+					maxResolution: 0.3515625,		
+			        //maxResolution: 1.40625,
+			        maxExtent: new OpenLayers.Bounds(-180, -90, 180, 90)
+				};	
+				map = new OpenLayers.Map('map', options);	
+	
+				var agsTiledLayer0 = new OpenLayers.Layer.WMTS( 
+					"Blue Marble WMTS",  
+					"http://zeon/wmts/",
+					{					
+						layer: "world",
+						style: "blue_marble",
+						tilematrixset: "arcgis_online",
+						format: "image/jpeg"
+					},
+					{
+						tileSize: new OpenLayers.Size(512, 512),			
+						tileOrigin: new OpenLayers.LonLat(-180, 90),
+						tileFullExtent: new OpenLayers.Bounds(-180, -90, 180, 90),
+						isBaseLayer: true,
+						singleTile: false,
+						requestEncoding: "REST"			
+					}
+				);  
+				map.addLayer(agsTiledLayer0);
+				
+				map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);
+				
+				var url = "http://sazabi:8080/geowebcache-1.2.2/service/wmts/";
+				var tileMatrixSet = "arcgis-online-wgs84";
+				
+				OpenLayers.loadURL(
+					url,                	
+			       	{ request: "GetCapabilities",service: "WMTS",version: "1.0.0" },
+			        this,  
+			       	function(request) {
+						var format = new OpenLayers.Format.WMTSCapabilities();
+						var capabilities = format.read(request.responseXML || request.responseText);    				
+						var gwcWmtsLayer0 = new OpenLayers.Layer.WMTS( 
+							"GeoWebCache USA WMTS", 
+							url,
+							{					
+								layer: "arcgis-online-wms",
+								style: "",
+								tilematrixset: tileMatrixSet,				
+								format: "image/png"
+							},
+							{																			 	
+								isBaseLayer: false,
+								singleTile: false,
+								// WMTS specific options
+								requestEncoding: "KVP",
+								tileMatrics: capabilities.contents.tileMatrixSets[tileMatrixSet].tileMatrics,
+								tileFullExtent: new OpenLayers.Bounds(-180, -90, 180, 90)
+							}
+						);  
+						gwcWmtsLayer0.setOpacity(0.49);
+						map.addLayer(gwcWmtsLayer0);	
+						map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);
+					}
+			    );	
+			}
+		</script>
+	</head>
+	<body onload="init();">
+		<div id="map" class="smallmap"></div>  
+	</body>
+</html>

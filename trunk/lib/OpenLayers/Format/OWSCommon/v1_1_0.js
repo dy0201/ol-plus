@@ -39,6 +39,9 @@ OpenLayers.Format.OWSCommon.v1_1_0 = OpenLayers.Class(OpenLayers.Format.OWSCommo
             },
             "MaximumValue": function(node, range) {
                 range.maxValue = this.getChildValue(node);
+            },
+            "Identifier": function(node, obj) {
+            	obj.identifier = this.getChildValue(node);
             }
         }, OpenLayers.Format.OWSCommon.v1.prototype.readers["ows"])
     },
