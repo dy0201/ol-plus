@@ -178,6 +178,27 @@ OpenLayers.Format.OWSCommon.v1_1_0 = OpenLayers.Class(OpenLayers.Format.XML, {
             },
             "MaximumValue": function(node, range) {
                 range.maxValue = this.getChildValue(node);
+            },
+            "WGS84BoundingBox": function(node, obj) {
+            	obj.wgs84BoundingBox = {};
+            	this.readChildNodes(node, obj.wgs84BoundingBox);
+            },
+            "BoundingBox": function(node, obj) {
+            	obj.boundingBox = {};
+            	this.readChildNodes(node, obj.boundingBox);
+            },
+            "LowerCorner": function(node, obj) {
+            	var lowerCorner = this.getChildValue(node);
+            	var coords = lowerCorner.split(" ");
+            	obj.lowerCorner = new OpenLayers.LonLat(parseFloat(coords[0]), parseFloat(coords[1]));
+            },
+            "UpperCorner": function(node, obj) {
+            	var upperCorner = this.getChildValue(node);
+            	var coords = upperCorner.split(" ");
+            	obj.upperCorner = new OpenLayers.LonLat(parseFloat(coords[0]), parseFloat(coords[1]));            	 
+            },
+            "Identifier": function(node, obj) {
+            	obj.identifier = this.getChildValue(node);
             }
         }
     },
